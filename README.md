@@ -3,6 +3,10 @@
 RoboToy is a game with real robots that you can control and watch through a mobile device or a personal computer. 
 You can think about it as some kind of 'first person shooter' style of game with real world graphics. In the place of some 3d rendered scene you will see video streamed by a mounted camera on your real world robot. Whenever you press the movement buttons, your robot will respond accordingly. Whenever you 'shoot' your 'cannon' using on screen game pad, a LED cannon mounted on your robot will flash and hopefully will hit an amplified light detector mounted on another robot. Player controllers and robots communicates with each other through an existent LAN or through an Access Point setup in one of the robots. Basically this is the general game idea.
 
+## Home Page
+
+You can find more information at the [RoboToy Home Page](http://gustavohbf.github.io/robotoy).
+
 
 ## Collaboration
 
