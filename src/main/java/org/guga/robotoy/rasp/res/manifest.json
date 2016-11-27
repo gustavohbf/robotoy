@@ -1,0 +1,20 @@
+{
+  "lang": "pt-br",
+  "dir": "ltr",
+  "name": "RoboToy",
+  "description": "Jogo com controle de robo na vida real",
+  "short_name": "RoboToy",
+  "icons": [{
+    "src": "lo_def.ico",
+    "sizes": "32x32",
+    "type": "image/ico"
+  }, {
+    "src": "hi_def.png",
+    "sizes": "128x128",
+    "type": "image/png"
+  }],
+  "start_url": "index.jsp",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "black"
+}

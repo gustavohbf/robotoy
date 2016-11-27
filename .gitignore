@@ -9,6 +9,9 @@
 *.ear
 *.tar.gz
 
+# Reincludes this particular package, since it's obtained through Debian package distro (librxtx-java)
+!RXTXcomm.jar
+
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
@@ -27,4 +30,4 @@ target
 /bin/
 /build/
 /out/
-/lib/
+

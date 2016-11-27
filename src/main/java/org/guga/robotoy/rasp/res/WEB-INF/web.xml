@@ -1,0 +1,23 @@
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+	      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	      xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+	      http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+	      version="3.0">
+    <display-name>RoboToy</display-name>   
+    <description>
+    	RoboToy client web interface
+    </description>
+     <welcome-file-list>
+          <welcome-file>index.jsp</welcome-file>
+     </welcome-file-list>
+     <session-config> 
+          <!--Max inactive timeout in minutes-->
+          <session-timeout>5</session-timeout>
+     </session-config>
+     <jsp-config>
+	  <taglib>
+	    <taglib-uri>robotoy.tld</taglib-uri>
+	    <taglib-location>/robotoy.tld</taglib-location>
+	  </taglib>
+	</jsp-config>
+</web-app>

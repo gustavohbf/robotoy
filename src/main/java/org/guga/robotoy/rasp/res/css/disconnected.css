@@ -1,0 +1,25 @@
+.disconnected {
+    border-radius: 25px;
+    border: 2px solid #AD7321;
+    padding: 20px; 
+	top: 15%;
+    left: 15%;
+    width: 60%;
+    height: 60%;
+    opacity: 0.9;
+    filter: alpha(opacity=90); 
+    text-align: center;
+	margin: 0 auto;
+	vertical-align: middle;
+	background: white;
+	background: -webkit-linear-gradient(yellow, red);
+	background: -o-linear-gradient(yellow, red);
+	background: -moz-linear-gradient(yellow, red);
+	background: linear-gradient(yellow, red);
+}
+.disconnected h1 {
+	color: white;
+    text-shadow: 2px 2px 4px #000000;
+    text-align: center;
+	vertical-align: middle;
+}

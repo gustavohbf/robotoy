@@ -1,0 +1,33 @@
+.button {
+	text-decoration: none;
+	color: #fff;
+	font-weight: bold;
+	padding: 12px 20px;
+	font-size: 18px;
+	border-radius: 10px;
+	background-color: #666666;	
+	box-shadow: 0 5px 5px #313131, 0 9px 0 #393939, 0px 9px 10px rgba(0,0,0,0.4), inset 0px 2px 9px rgba(255,255,255,0.2), inset 0 -2px 9px rgba(0,0,0,0.2);
+	position: relative;
+	border-bottom: 1px solid rgba(255,255,255,0.2);
+	display: inline-block;
+	text-shadow: 0px -1px 0px rgba(0,0,0,0.2);
+	margin-bottom: 40px;
+}
+.button:hover {
+	box-shadow: 0 5px 5px #313131, 0 9px 0 #393939, 0px 9px 10px rgba(0,0,0,0.4), inset 0px 2px 15px rgba(255,255,255,0.4), inset 0 -2px 9px rgba(0,0,0,0.2);
+}
+.blue {
+	background: #2a8ad8;
+	box-shadow: 0 5px 5px #364a8e, 0 9px 0 #25325e, 0px 9px 10px rgba(0,0,0,0.4), inset 0px 2px 9px rgba(255,255,255,0.2), inset 0 -2px 9px rgba(0,0,0,0.2);
+}
+
+.blue:hover {
+	box-shadow: 0 5px 5px #364a8e, 0 9px 0 #25325e, 0px 9px 10px rgba(0,0,0,0.4), inset 0px 2px 15px rgba(255,255,255,0.4), inset 0 -2px 9px rgba(0,0,0,0.2);
+}
+.blue:active {
+	box-shadow: 0 2px 0 #25325e, 0px 4px 4px rgba(0,0,0,0.3), inset 0px 2px 5px rgba(0,0,0,0.2);
+}
+.small {
+	font-size: 10px;
+	padding: 8px 8px;
+}

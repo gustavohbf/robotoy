@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<!DOCTYPE taglib
+  PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.1//EN"
+  "http://java.sun.com/j2ee/dtds/web-jsptaglibrary_1_1.dtd">
+
+<taglib>
+
+
+  <tlibversion>1.0</tlibversion>
+  <jspversion>1.1</jspversion>
+  <shortname>RoboToy Tag Library</shortname>
+
+  <info>
+    This tag library contains functionality specific to RoboToy application.
+  </info>
+  
+  <tag>
+    <name>currentpage</name>
+    <tagclass>org.guga.robotoy.rasp.tags.CurrentPageTag</tagclass>
+    <bodycontent>empty</bodycontent>
+  </tag>
+  
+  <tag>
+    <name>alert</name>
+    <tagclass>org.guga.robotoy.rasp.tags.AlertTag</tagclass>
+    <bodycontent>empty</bodycontent>
+    
+	<attribute>
+	<name>property</name>
+	<required>true</required>
+	</attribute>
+	
+	<attribute>
+	<name>defaultValue</name>
+	<required>false</required>
+	</attribute>
+  </tag>
+
+  <tag>
+    <name>login</name>
+    <tagclass>org.guga.robotoy.rasp.tags.LoginPageTag</tagclass>
+    <bodycontent>empty</bodycontent>
+    
+	<attribute>
+	<name>userName</name>
+	<required>true</required>
+	<rtexprvalue>true</rtexprvalue>
+	</attribute>
+
+  	<attribute>
+	<name>alertProperty</name>
+	<required>false</required>
+	</attribute>
+  </tag>
+
+  <tag>
+    <name>setup</name>
+    <tagclass>org.guga.robotoy.rasp.tags.SetupTag</tagclass>
+    <bodycontent>empty</bodycontent>
+    
+  	<attribute>
+	<name>alertProperty</name>
+	<required>false</required>
+	</attribute>
+  </tag>
+
+  <tag>
+    <name>access</name>
+    <tagclass>org.guga.robotoy.rasp.tags.AccessTag</tagclass>
+    <bodycontent>empty</bodycontent>
+  </tag>
+
+  <tag>
+    <name>username</name>
+    <tagclass>org.guga.robotoy.rasp.tags.UserNameTag</tagclass>
+    <bodycontent>empty</bodycontent>
+  </tag>
+
+  <tag>
+    <name>robotid</name>
+    <tagclass>org.guga.robotoy.rasp.tags.RobotIdTag</tagclass>
+    <bodycontent>empty</bodycontent>
+  </tag>
+
+  <tag>
+    <name>color</name>
+    <tagclass>org.guga.robotoy.rasp.tags.ColorTag</tagclass>
+    <bodycontent>empty</bodycontent>
+  </tag>
+
+  <tag>
+    <name>sessionid</name>
+    <tagclass>org.guga.robotoy.rasp.tags.SessionIdTag</tagclass>
+    <bodycontent>empty</bodycontent>
+  </tag>
+
+  <tag>
+    <name>cameraport</name>
+    <tagclass>org.guga.robotoy.rasp.tags.CameraPortTag</tagclass>
+    <bodycontent>empty</bodycontent>
+  </tag>
+
+  <tag>
+    <name>maxlife</name>
+    <tagclass>org.guga.robotoy.rasp.tags.MaxLifeTag</tagclass>
+    <bodycontent>empty</bodycontent>
+  </tag>
+
+  <tag>
+    <name>playerscount</name>
+    <tagclass>org.guga.robotoy.rasp.tags.PlayersCountTag</tagclass>
+    <bodycontent>empty</bodycontent>
+  </tag>
+
+  <tag>
+    <name>controlmode</name>
+    <tagclass>org.guga.robotoy.rasp.tags.ControlModeTag</tagclass>
+    <bodycontent>empty</bodycontent>
+
+	<attribute>
+	<name>property</name>
+	<required>false</required>
+	</attribute>
+  </tag>
+
+  <tag>
+    <name>playmode</name>
+    <tagclass>org.guga.robotoy.rasp.tags.PlayModeTag</tagclass>
+    <bodycontent>empty</bodycontent>
+
+  	<attribute>
+	<name>property</name>
+	<required>false</required>
+	</attribute>
+  </tag>
+
+  <tag>
+    <name>chgname</name>
+    <tagclass>org.guga.robotoy.rasp.tags.ChgNameTag</tagclass>
+    <bodycontent>empty</bodycontent>
+    
+	<attribute>
+	<name>userName</name>
+	<required>true</required>
+	<rtexprvalue>true</rtexprvalue>
+	</attribute>
+
+	<attribute>
+	<name>change</name>
+	<required>true</required>
+	<rtexprvalue>true</rtexprvalue>
+	</attribute>
+
+  	<attribute>
+	<name>alertProperty</name>
+	<required>false</required>
+	</attribute>
+  </tag>
+
+</taglib>
