@@ -1,0 +1,35 @@
+*.class
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+*.tar.gz
+
+# Reincludes this particular package, since it's obtained through Debian package distro (librxtx-java)
+!RXTXcomm.jar
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+# IDE specific
+target
+.metadata
+.gradle
+.settings
+.classpath
+.project
+.idea
+*.iml
+.DS_Store
+
+# Binaries
+/bin/
+/build/
+/out/
+
+# Related to other source code branches
+/gradle/
