@@ -60,7 +60,7 @@ public class InetUtils {
 	
 	public static String DEFAULT_NETWORK_INTERFACES_FILE = "/etc/network/interfaces";
 
-	public static String DEFAULT_NETWORK_CONFIG_FILENAME = "wpa_robotoy.conf";
+	public static String DEFAULT_NETWORK_CONFIG_FILENAME = "wpa_supplicant.conf";
 
 	public static String DEFAULT_AP_NETWORK = "192.168.2.0";
 
@@ -75,6 +75,11 @@ public class InetUtils {
 	public static String DEFAULT_HOSTAPD_PID_FILE = "/run/hostapd.pid";
 
 	public static String DEFAULT_DNSMASQ_CONFIG_FILE = "/etc/dnsmasq.conf";
+	
+	/**
+	 * Minimum length of WPA password according to IEEE standard
+	 */
+	public static final int MIN_WPA_KEY_LEN = 8;
 	
 	/**
 	 * Driver used with HostAPD whenever using an external WiFi USB adapter
@@ -144,42 +149,13 @@ public class InetUtils {
 			throw new Exception("Could not get a valid result!");
 		Pattern p = Pattern.compile("(?<!#)psk=([^\n]+)$", Pattern.MULTILINE);
 		Matcher m = p.matcher(results.toString());
-		if (!m.find())
-			throw new Exception("Could not get a valid result!");
+		if (!m.find()) {
+			if (passphrase.length()<MIN_WPA_KEY_LEN)
+				throw new Exception("Password should have a minimum of "+MIN_WPA_KEY_LEN+" characters!");
+			else
+				throw new Exception("Could not get a valid result!");
+		}
 		return m.group(1).trim();
-	}
-	
-	/**
-	 * Creates new network configuration file contents given its properties.
-	 */
-	public static String makeNetConfiguration(String ssid,boolean hidden_ssid,String psk) {
-		if (ssid==null || ssid.length()==0) {
-			throw new UnsupportedOperationException("SSID is missing!");
-		}
-		if (ssid.indexOf('\n')>=0
-			|| ssid.indexOf('\r')>=0
-			|| ssid.indexOf('\b')>=0
-			|| ssid.indexOf('\"')>=0
-			|| ssid.indexOf('\0')>=0) {
-			throw new UnsupportedOperationException("SSID not supported: "+ssid);
-		}
-		
-		StringBuilder sb = new StringBuilder();
-		sb.append("country=BR");
-		sb.append("\nctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev");
-		sb.append("\nupdate_config=1");
-		sb.append("\n");
-		sb.append("\nnetwork={");
-		sb.append("\n\tssid=\""+ssid+"\"");
-		if (hidden_ssid) {
-			sb.append("\n\tscan_ssid=1");
-		}
-		if (psk!=null && psk.length()>0) {
-			sb.append("\n\tpsk="+psk);
-		}
-		
-		sb.append("\n}");
-		return sb.toString();
 	}
 	
 	public static enum WiFiBand {
@@ -332,6 +308,45 @@ public class InetUtils {
 	public static void restartNetInterface(String iface_name) throws Exception {
 		stopNetInterface(iface_name);
 		startNetInterface(iface_name);
+	}
+	
+	/**
+	 * Given a network interface name, return its address.
+	 */
+	public static String getNetInterfaceAddress(String iface_name) {
+		try {
+			NetworkInterface net = NetworkInterface.getByName(iface_name);
+			if (net==null)
+				return null;
+			Enumeration<InetAddress> addrs = net.getInetAddresses();
+			while (addrs.hasMoreElements()) {
+				InetAddress addr = addrs.nextElement();
+				if (addr.isLoopbackAddress())
+					continue;
+				return addr.getHostAddress();
+			}
+			return null;
+		} catch (SocketException e) {
+			return null;
+		}
+	}
+	
+	/**
+	 * Given a network interface name and an IP address with optional network mask (e.g.: 192.168.2.1/24),
+	 * assign the given address to the given interface.
+	 */
+	public static void setNetInterfaceAddress(String iface_name,String address_with_mask) throws Exception {
+		StringBuilder results = new StringBuilder();
+		try {
+			ProcessUtils.execute(null, results, ProcessUtils.DEFAULT_ENCODING, "ip", "addr", "add",
+					address_with_mask,
+					"dev", iface_name);
+		}
+		finally {
+			if (log.isLoggable(Level.FINE)) {
+				log.log(Level.FINE,"ip addr add results:\n"+results.toString());
+			}
+		}
 	}
 		
 	/**

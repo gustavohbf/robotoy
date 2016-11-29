@@ -508,16 +508,17 @@ public class WebServer implements org.guga.robotoy.rasp.network.Server {
 				String protocol = baseRequest.getProtocol();
 				log.log(Level.FINE,protocol.toUpperCase()+" REQUEST "+request.getRequestURI()+" FROM "+baseRequest.getRemoteAddr());
 			}
-			String uri = request.getRequestURI().toLowerCase();
-			if ("/".equals(uri) || "/index.html".equals(uri) || "/index.htm".equals(uri) || "/index.jsp".equals(uri)) {
+			String uri = request.getRequestURI();
+			final String uri_lc = uri.toLowerCase();
+			if ("/".equals(uri) || "/index.html".equalsIgnoreCase(uri) || "/index.htm".equalsIgnoreCase(uri) || "/index.jsp".equalsIgnoreCase(uri)) {
 				return; // this request will be handled by 'WebAppContext'
 			}
-			else if (webSocketContext!=null && uri.startsWith(webSocketContext)) {
+			else if (webSocketContext!=null && uri_lc.startsWith(webSocketContext)) {
 				return; // this request will be handled by 'WebSocketHandler'
 			}
-			else if (uri.endsWith(".html") || uri.endsWith(".htm") || uri.endsWith(".jsp")) {
+			else if (uri_lc.endsWith(".html") || uri_lc.endsWith(".htm") || uri_lc.endsWith(".jsp")) {
 				RequestedPathParts parts = breakURIParts(uri,resourcesPackageName);
-				if (uri.endsWith(".jsp")) {
+				if (uri_lc.endsWith(".jsp")) {
 					WebCacheControl.setNoCache(response);
 				}
 				if (customAutoRedirection!=null) {				
@@ -537,11 +538,11 @@ public class WebServer implements org.guga.robotoy.rasp.network.Server {
 				}
 				return; // this request will be handled by 'WebAppContext'
 			}
-			else if ("/manifest.json".equals(uri)) {
+			else if ("/manifest.json".equalsIgnoreCase(uri)) {
 				serveTextContents(resourcesPackageName+"/manifest.json","application/manifest+json",baseRequest,request,response,/*cacheable*/false);
 				baseRequest.setHandled(true);				
 			}
-			else if (uri.endsWith(".js")) {
+			else if (uri_lc.endsWith(".js")) {
 				RequestedPathParts parts = breakURIParts(uri,defaultJsPackageName);
 				final long resource_timestamp = IOUtils.getResourceLastModified(WebServer.class, parts.resourceFullName);
 				if (resource_timestamp>0 && WebCacheControl.checkCacheTimeBased(request, resource_timestamp)) {
@@ -555,7 +556,7 @@ public class WebServer implements org.guga.robotoy.rasp.network.Server {
 				serveTextContents(parts.resourceFullName,"application/javascript",baseRequest,request,response,/*cacheable*/true);
 				baseRequest.setHandled(true);				
 			}
-			else if (uri.endsWith(".css")) {
+			else if (uri_lc.endsWith(".css")) {
 				RequestedPathParts parts = breakURIParts(uri,defaultCssPackageName);
 				final long resource_timestamp = IOUtils.getResourceLastModified(WebServer.class, parts.resourceFullName);
 				if (resource_timestamp>0 && WebCacheControl.checkCacheTimeBased(request, resource_timestamp)) {
@@ -569,11 +570,11 @@ public class WebServer implements org.guga.robotoy.rasp.network.Server {
 				serveTextContents(parts.resourceFullName,"text/css",baseRequest,request,response,/*cacheable*/true);
 				baseRequest.setHandled(true);				
 			}
-			else if (uri.endsWith(".png")
-					|| uri.endsWith(".ico")
-					|| uri.endsWith(".jpg")
-					|| uri.endsWith(".gif")) {
-				if (uri.endsWith("apple-touch-icon.png"))
+			else if (uri_lc.endsWith(".png")
+					|| uri_lc.endsWith(".ico")
+					|| uri_lc.endsWith(".jpg")
+					|| uri_lc.endsWith(".gif")) {
+				if (uri_lc.endsWith("apple-touch-icon.png"))
 					uri = "/hi_def.png";
 				RequestedPathParts parts = breakURIParts(uri,defaultImagesPackageName);
 				final long resource_timestamp = IOUtils.getResourceLastModified(WebServer.class, parts.resourceFullName);
@@ -599,9 +600,9 @@ public class WebServer implements org.guga.robotoy.rasp.network.Server {
 				}
 				baseRequest.setHandled(true);
 			}
-			else if (uri.endsWith(".mp3")
-					|| uri.endsWith(".ogg")
-					|| uri.endsWith(".wav")) {
+			else if (uri_lc.endsWith(".mp3")
+					|| uri_lc.endsWith(".ogg")
+					|| uri_lc.endsWith(".wav")) {
 				RequestedPathParts parts = breakURIParts(uri,resourcesPackageName);
 				final long resource_timestamp = IOUtils.getResourceLastModified(WebServer.class, parts.resourceFullName);
 				if (resource_timestamp>0 && WebCacheControl.checkCacheTimeBased(request, resource_timestamp)) {
@@ -618,9 +619,9 @@ public class WebServer implements org.guga.robotoy.rasp.network.Server {
 						response.sendError(HttpServletResponse.SC_NOT_FOUND);
 					}
 					else {
-						if (uri.endsWith(".ogg"))
+						if (uri_lc.endsWith(".ogg"))
 							response.setHeader("Content-Type", "audio/ogg");
-						else if (uri.endsWith(".wav"))
+						else if (uri_lc.endsWith(".wav"))
 							response.setHeader("Content-Type", "audio/wav");
 						else
 							response.setHeader("Content-Type", "audio/mpeg");
@@ -736,6 +737,10 @@ public class WebServer implements org.guga.robotoy.rasp.network.Server {
 				contents = contents.replace(MASK_SERVERHOST, baseRequest.getLocalAddr());
 			}
 			out.write(contents);
+		}
+		catch (RuntimeException|IOException e) {
+			log.log(Level.SEVERE, "Error while serving contents for "+resourceName, e);
+			throw e;
 		}
 	}
 	

@@ -69,4 +69,9 @@ public interface WebSocketActiveSession {
      * Tells if this connection was started here in this robot.
      */
     public boolean isStartedHere();
+    
+    /**
+     * Close the active session
+     */
+    public void close();
 }

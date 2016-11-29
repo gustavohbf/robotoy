@@ -42,8 +42,8 @@
 	<li><a onClick="restartGame();return false;" href="#">Restart Game</a></li>
 	<li><a onClick="becomeAP();return false;" href="#">WiFi: Become Access Point</a>
 	<select id="net_ap" name="net_ap">
-		<option value="INTERNAL_AP">Internal WiFi(wlan0)</option>
 		<option value="VIRTUAL_AP">Internal WiFi + virtual (wlan0 + uap0)</option>
+		<option value="INTERNAL_AP">Internal WiFi only (wlan0)</option>
 		<option value="EXTERNAL_2G5">External WiFi (2.5GHz)</option>
 		<option value="EXTERNAL_5G">External WiFi (5GHz)</option>
 	</select>
@@ -54,6 +54,7 @@
 <c:if test="${playmode eq 'STANDALONE'}">
 	<li><a onClick="changePlayMode('MULTIPLAYER');return false;" href="#">Change game mode to: MULTIPLAYER</a></li>
 </c:if>
+	<li><a href="/setup.jsp?netdialog=true">Configure Network</a>
 	<li><a onClick="reboot();return false;" href="#">Reboot</a></li>
 	<li><a onClick="shutdown();return false;" href="#">Shutdown</a></li>
 </ul>
@@ -116,6 +117,10 @@ function shutdown() {
 	    async: false,
 	    success: function(text) { alert(text); }
 	});
+}
+function configNetwork() {
+	var div = document.getElementById("setupdialog");	
+	div.style.display = "flex"	
 }
 </script>
 </body>

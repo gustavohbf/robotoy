@@ -21,11 +21,13 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringUtils;
 import org.guga.robotoy.rasp.controller.RoboToyServerController;
+import org.guga.robotoy.rasp.game.GameState;
 import org.guga.robotoy.rasp.utils.InetUtils;
 import org.guga.robotoy.rasp.utils.InetUtils.NetAdapter;
 
@@ -134,10 +136,24 @@ public class RoboToyAccessPoint {
 	 * Initializes Access Point. Create virtual interface if it does not exist.
 	 */
 	public static void becomeAccessPoint(RoboToyServerController controller,InetUtils.WiFiModeEnum mode) throws Exception {
-		if (null!=controller.getAutoDiscoverOtherRobots()) {
-			controller.getAutoDiscoverOtherRobots().stopService();
+		final int port = controller.getAutoDiscoveryCallback().getPort();
+		final int portSecure = controller.getAutoDiscoveryCallback().getPortSecure();
+		
+		// Stop temporarily the auto-discover service
+		controller.stopAutoDiscoverService();
+		
+		// Remove all connected players and robots
+		WebSocketClientPool pool = controller.getContext().getWebSocketPool();
+		for (WebSocketActiveSession session:new ArrayList<>(pool.getActiveSessions())) {
+			try { session.close(); }
+			catch (Throwable e){ }
 		}
 		
+		// Remove all players and robots from current game state
+		GameState game = controller.getContext().getGame();
+		game.removeAllPlayers();
+		game.removeAllRobots();
+
 		// If it's already running as an Access Point, it should stop it
 		int hostapd_pid;
 		try {
@@ -167,16 +183,27 @@ public class RoboToyAccessPoint {
 		if (mode.getVirtualName()!=null && !hasNetInterface(mode.getVirtualName())) {
 			InetUtils.createAPInterface(mode.getINetName(),mode.getAPName());
 		}
+		// Assign a static IP address to the Access Point interface in case it has not been done so far
+		String addr = InetUtils.getNetInterfaceAddress(mode.getAPName());
+		if (addr!=null) {
+			if (log.isLoggable(Level.INFO))
+				log.log(Level.INFO,"Interface "+mode.getAPName()+" already configured with IP address "+addr
+						+". Leaving it this way...");
+		}
+		else {
+			InetUtils.setNetInterfaceAddress(mode.getAPName(), InetUtils.DEFAULT_AP_GATEWAY_IP_ADDRESS+"/24");
+		}
 		if (!InetUtils.isDNSMasqConfigured(mode.getAPName())) {
 			String dnsmasq_config = InetUtils.makeDNSMasqConfiguration(mode.getAPName());
 			try (OutputStream output = new BufferedOutputStream(new FileOutputStream(new File(InetUtils.DEFAULT_DNSMASQ_CONFIG_FILE)));) {
 				output.write(dnsmasq_config.getBytes("UTF-8"));
 			}			
 		}
+		// Restart DNSMASQ service
 		InetUtils.restartDNSMASQ();
+		// Enable IP Forwarding
 		InetUtils.enableIPForward();
-		int port = controller.getAutoDiscoveryCallback().getPort();
-		int portSecure = controller.getAutoDiscoveryCallback().getPortSecure();
+		// Setup NAT rules for dealing with captive portal (i.e. this RoboToy embedded web application)
 		InetUtils.setupNATRulesForCaptivePortal(port,portSecure,mode.getAPName(),InetUtils.DEFAULT_AP_GATEWAY_IP_ADDRESS,InetUtils.DEFAULT_AP_NETWORK);
 		if (controller.getContext()!=null 
 				&& controller.getContext().getGame()!=null 
@@ -185,11 +212,16 @@ public class RoboToyAccessPoint {
 				InetUtils.addByPassToCaptivePortal(mode.getAPName(),address,port,portSecure);
 			}
 		}
+		// Restart net interface
 		InetUtils.restartNetInterface(mode.getAPName());
+		// Start HOSTAPD
 		InetUtils.startHostAPD();
+		// Remember our choice
 		if (controller.getContext()!=null) {
 			controller.getContext().setAccessPointMode(mode);
 		}
+		// Start auto discover service
+		controller.startAutoDiscoverService(port, portSecure);		
 	}
 	
 	/**

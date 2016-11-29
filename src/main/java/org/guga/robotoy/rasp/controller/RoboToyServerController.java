@@ -396,6 +396,13 @@ public class RoboToyServerController implements CommandCentral, InclusionCallbac
 			);
 	}
 	
+	public void stopAutoDiscoverService() {
+		if (autoDiscoverOtherRobots!=null) {
+			autoDiscoverOtherRobots.removeShutdownHook();
+			autoDiscoverOtherRobots.stopService();
+		}
+	}
+	
 	public AutoDiscoveryRobotsCallback getAutoDiscoveryCallback() {
 		return autoDiscoveryCallback;
 	}
@@ -544,6 +551,19 @@ public class RoboToyServerController implements CommandCentral, InclusionCallbac
 			}
 			else {
 				return "index.jsp";	// not an administrator
+			}
+		}
+		if (resourceName.endsWith("setup.jsp")) {
+			if (GamePlayMode.STANDALONE.equals(context.getGamePlayMode()))
+				return null; // go to setup page in STANDALONE mode for whatever user logged in
+			else {
+				String userName = (session==null) ? null : (String)session.getAttribute("USERNAME");
+				if (userName!=null && adminUserName!=null && adminUserName.equalsIgnoreCase(userName)) {
+					return null; // go to setup page if not in STANDALONE mode as long as the user is admin
+				}
+				else {
+					return "index.jsp";	// not an administrator
+				}				
 			}
 		}
 		if (GamePlayMode.STANDALONE.equals(context.getGamePlayMode())) {

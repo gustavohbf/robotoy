@@ -1,0 +1,19 @@
+.dialogpanel {
+    border-radius: 25px;
+    border: 2px solid #2173AD;
+    padding: 20px; 
+	top: 15%;
+    left: 15%;
+    width: 60%;
+    height: 60%;
+    text-align: center;
+	margin: 0 auto;
+	vertical-align: middle;	
+	background: white;
+}
+.dialogpanel table {
+	border: 0px;
+	display: table;
+	width: 100%;	
+	height: 100%;
+}

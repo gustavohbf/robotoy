@@ -245,6 +245,11 @@ public class SocketServer implements Server {
 				public String getSessionId() {
 					return String.valueOf(System.identityHashCode(clientSocket));
 				}
+
+				@Override
+				public void close() {
+					// nothing to do					
+				}
 				
 			};
 			

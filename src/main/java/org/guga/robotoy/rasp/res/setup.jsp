@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=iso-8859-1" 
-	language="java"%><%@ taglib uri="robotoy.tld" prefix="app" %><app:setup alertProperty="alert"/><!DOCTYPE html>
+	language="java"%><%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %><%@ taglib uri="robotoy.tld" prefix="app" %><app:setup alertProperty="alert"/><app:playmode/><!DOCTYPE html>
 <html>
 <head>
 	<title>RoboToy Setup Page</title>
@@ -8,6 +8,8 @@
 	<meta name="viewport" content="width=device-width,initial-scale=1.0">
 	<meta name="copyright" content="© 2016 https://github.com/gustavohbf/robotoy" />
 	<link rel="stylesheet" type="text/css" href="buttons.css" />
+	<link rel="stylesheet" type="text/css" href="dialogs.css" />
+	<script src="jquery-1.12.0.min.js"></script>
 	<style>
 p.alert {
 	font-family: Arial, Helvetica, sans-serif;
@@ -15,33 +17,19 @@ p.alert {
 	text-align:center;
 	color: #ff1111;
 }
-.dialogpanel {
-    border-radius: 25px;
-    border: 2px solid #2173AD;
-    padding: 20px; 
-	top: 15%;
-    left: 15%;
-    width: 60%;
-    height: 60%;
-    text-align: center;
-	margin: 0 auto;
-	vertical-align: middle;	
-	background: white;
-}
-.dialogpanel table {
-	border: 0px;
-	display: table;
-	width: 100%;	
-	height: 100%;
-}
 	</style>
 </head>
 <body>
 <form id="setup" method="post">
 <img src="logo.png" alt="RoboToy" width="200"/> 
 <p><h1>Setup Page</h1></p>
-<app:alert property="alert" defaultValue="RoboToy is currently running as STANDALONE. Please choose one option below:"/>
+<app:alert property="alert" defaultValue="RoboToy is currently running as ${playmode}. Please choose one option below:"/>
+<c:if test="${playmode eq 'STANDALONE'}">
 <input type="button" class="blue button" value="Test Drive (Single Player)" onclick="startSinglePlayer()">
+</c:if>
+<c:if test="${playmode eq 'MULTIPLAYER'}">
+<input type="button" class="blue button" value="Enter Game" onclick="window.location='/index.jsp'">
+</c:if>
 <br>
 <input type="button" class="blue button" value="Configure Network" onclick="configNetwork()">
 <br>
@@ -124,6 +112,9 @@ function rebootRobotoyDismiss() {
 	var div = document.getElementById("confirmdialog");	
 	div.style.display = "none"
 }
+<c:if test="${(param.netdialog && param.cmd == null)}">
+$(document).ready(function() { configNetwork(); });
+</c:if>
 </script>
 </body>
 </html>

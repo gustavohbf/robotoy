@@ -33,6 +33,7 @@ import org.guga.robotoy.rasp.game.GamePlayMode;
 import org.guga.robotoy.rasp.game.GamePlayer;
 import org.guga.robotoy.rasp.game.GameStart;
 import org.guga.robotoy.rasp.game.GameState;
+import org.guga.robotoy.rasp.network.WPASupplicantConf;
 import org.guga.robotoy.rasp.utils.InetUtils;
 
 /**
@@ -67,9 +68,17 @@ public class SetupTag extends RoboToyCommonTag {
 		RoboToyServerController controller = assertController();
 		// Check if current mode is different from expected mode
 		if (!GamePlayMode.STANDALONE.equals(controller.getContext().getGamePlayMode())) {
-			getResponse().sendError(HttpServletResponse.SC_FORBIDDEN, "This resource is not acceptable in current mode!");
-			log.log(Level.SEVERE, "Access denied to request from "+getRequest().getRemoteAddr());
-			return;
+			// In different game mode it's only allowed for admin user
+			String name = (String)getSession().getAttribute("USERNAME");
+			boolean is_admin = 
+						controller.getAdminUserName()!=null
+					&& 	name!=null
+					&&  controller.getAdminUserName().equalsIgnoreCase(name);
+			if (!is_admin) {
+				getResponse().sendError(HttpServletResponse.SC_FORBIDDEN, "This resource is not acceptable in current mode!");
+				log.log(Level.SEVERE, "Access denied to request from "+getRequest().getRemoteAddr());
+				return;
+			}
 		}
 				
 		String cmd = (String)getRequest().getParameter("cmd");
@@ -165,7 +174,7 @@ public class SetupTag extends RoboToyCommonTag {
 		else {
 			p = null;
 		}
-		// Change network settings (will be considered in next reboot)
+		// Generates passphrase
 		String psk;
 		try {
 			psk = (p!=null) ? InetUtils.genPSK(ssid, p) : null;
@@ -176,8 +185,26 @@ public class SetupTag extends RoboToyCommonTag {
 			}			
 			return;
 		}
-		String contents = InetUtils.makeNetConfiguration(ssid, /*hidden_ssid*/true, psk);
-		File config_file = new File(InetUtils.DEFAULT_PATH_TO_CONFIG_FILES+File.separator+InetUtils.DEFAULT_NETWORK_CONFIG_FILENAME);
+		// Change network settings (edit existing ones)
+		final String full_conf_filename = InetUtils.DEFAULT_PATH_TO_CONFIG_FILES+File.separator+InetUtils.DEFAULT_NETWORK_CONFIG_FILENAME;
+		File config_file = new File(full_conf_filename);
+		WPASupplicantConf conf = (config_file.exists() && config_file.isFile()) ? WPASupplicantConf.loadFile(full_conf_filename) : new WPASupplicantConf();
+		conf.setMissingHeaderConfigDefaultOptions();
+		WPASupplicantConf.NetworkConf netconf = conf.getNetworkConfigForSSID(ssid);
+		if (netconf==null) {
+			// add new configuration
+			netconf = new WPASupplicantConf.NetworkConf();
+			conf.addPerNetworkConfig(netconf);
+		}
+		else {
+			// edit existing configuration
+		}
+		netconf.setSSID(ssid);
+		netconf.setPSK(psk,false);
+		netconf.setScanSsid(1); // scan hidden SSID
+		netconf.setId(ssid.replaceAll(" ", "_"));
+		netconf.setPriority(5); // higher priority
+		String contents = conf.getFullContents();
 		if (log.isLoggable(Level.FINE))
 			log.log(Level.FINE, "Writing configuration file: "+config_file.getAbsolutePath());
 		try (OutputStream output = new BufferedOutputStream(new FileOutputStream(config_file));) {

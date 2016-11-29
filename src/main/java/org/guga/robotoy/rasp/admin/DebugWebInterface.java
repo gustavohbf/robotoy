@@ -21,8 +21,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
@@ -56,8 +54,8 @@ public class DebugWebInterface implements WebServer.CustomRESTfulService {
 	
 	private static final Logger log = Logger.getLogger(DebugWebInterface.class.getName());
 
-	private static final String DEFAULT_ROBOTOY_LOG_OUT_FILE = "/tmp/robotoyXXXX.out";
-	private static final String DEFAULT_ROBOTOY_LOG_ERR_FILE = "/tmp/robotoyXXXX.err";
+	private static final String DEFAULT_ROBOTOY_LOG_OUT_FILE = "/tmp/robotoy.out";
+	private static final String DEFAULT_ROBOTOY_LOG_ERR_FILE = "/tmp/robotoy.err";
 	private final GameState game;
 	private final RoboToyServerController controller;
 	//private final Server server;
@@ -230,13 +228,11 @@ public class DebugWebInterface implements WebServer.CustomRESTfulService {
 	 */
 	private String getLog(final int last_lines) {
 		StringBuilder log = new StringBuilder();
-		String timestamp = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
 		String[] files = {
 			DEFAULT_ROBOTOY_LOG_OUT_FILE,
 			DEFAULT_ROBOTOY_LOG_ERR_FILE
 		};
-		for (String f:files) {
-			String logFile = f.replace("XXXX", timestamp);
+		for (String logFile:files) {
 			File file = new File(logFile);
 			log.append(file.getAbsolutePath()+"  ===========================\n");
 			if (!file.exists()) {

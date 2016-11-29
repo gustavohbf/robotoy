@@ -75,6 +75,11 @@ public class AutoDiscoverService {
      * Socket for current server in progress
      */
     private MulticastSocket runningServerSocket;
+    
+    /**
+     * Shutdown hook configured by 'addShutdownHook'
+     */
+    private Thread shutdown_hook;
 
 	/**
 	 * Multicast Address
@@ -110,11 +115,17 @@ public class AutoDiscoverService {
 	 * once.
 	 */
 	public void addShutdownHook() {
-        Thread shutdown_hook = new Thread(this::stopService);
+        shutdown_hook = new Thread(this::stopService);
         shutdown_hook.setName("AutoDiscoverShutdownHook");
         shutdown_hook.setDaemon(true);
-        Runtime.getRuntime().addShutdownHook(shutdown_hook);    	
+        Runtime.getRuntime().addShutdownHook(shutdown_hook);
     }
+	
+	public void removeShutdownHook() {
+		if (shutdown_hook!=null)
+			Runtime.getRuntime().removeShutdownHook(shutdown_hook);
+		shutdown_hook = null;		
+	}
 
 	/**
 	 * Starts asynchronous client for monitoring other components in local network 

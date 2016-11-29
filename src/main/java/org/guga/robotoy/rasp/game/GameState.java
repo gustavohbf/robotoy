@@ -173,6 +173,10 @@ public class GameState {
 	public void removePlayer(GamePlayer player) {
 		players.remove(player);
 	}
+	
+	public void removeAllPlayers() {
+		players.clear();
+	}
 
 	public GamePlayer findPlayerWithAddress(String address) {
 		return findPlayerWithAddress(address,/*port*/0);
@@ -283,6 +287,11 @@ public class GameState {
 		robots.remove(robot);
 		if (robot.getAddress()!=null)
 			knownRobotAddresses.remove(robot.getAddress().getHostAddress());
+	}
+	
+	public void removeAllRobots() {
+		robots.clear();
+		knownRobotAddresses.clear();
 	}
 	
 	public GameRobot findLocalRobot() {
