@@ -429,6 +429,11 @@ public class WebServer implements org.guga.robotoy.rasp.network.Server {
         }
 	}
 	
+	@Override
+	public boolean isRunning() {
+		return server!=null && server.isRunning();
+	}
+	
 	private static List<ContainerInitializer> jspInitializers() {
 		JettyJasperInitializer sci = new JettyJasperInitializer();
 		ContainerInitializer initializer = new ContainerInitializer(sci, null);

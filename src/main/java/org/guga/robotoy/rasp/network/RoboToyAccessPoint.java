@@ -29,7 +29,6 @@ import org.apache.commons.lang.StringUtils;
 import org.guga.robotoy.rasp.controller.RoboToyServerController;
 import org.guga.robotoy.rasp.game.GameState;
 import org.guga.robotoy.rasp.utils.InetUtils;
-import org.guga.robotoy.rasp.utils.InetUtils.NetAdapter;
 
 /**
  * Some methods used for making this RoboToy work as an WiFi Access Point
@@ -80,7 +79,7 @@ public class RoboToyAccessPoint {
 	 * Check if there is connectivity to any wireless network. If there is no connection, will
 	 * turn it into an 'Access Point'.
 	 */
-	public static void checkAndBecomeAccessPoint(RoboToyServerController controller) {
+	public static void checkAndBecomeAccessPoint(RoboToyServerController controller,Server server) {
 		log.log(Level.FINE, "Checking current WiFi network status in order to decide if turn into Access Point...");
 		
 		// Check if already running as Access Point
@@ -116,16 +115,9 @@ public class RoboToyAccessPoint {
 		// If we did not connect to any Wireless Network and we are not running as Access Point, let's
 		// try to make it an Access Point.
 			
-		NetAdapter[] wifi_adapters = InetUtils.getWirelessAdapters();
-		if (wifi_adapters==null || wifi_adapters.length==0) {
-			log.log(Level.WARNING, "There are no wireless network adapters!");
-			return;
-		}
-
-		log.log(Level.FINE, "Could not get wireless status!");
 		log.log(Level.WARNING, "Starting Access Point at "+InetUtils.WiFiModeEnum.VIRTUAL_AP.getINetName()+"...");
 		try {
-			RoboToyAccessPoint.becomeAccessPoint(controller,InetUtils.WiFiModeEnum.VIRTUAL_AP);
+			RoboToyAccessPoint.becomeAccessPoint(controller,InetUtils.WiFiModeEnum.VIRTUAL_AP,server);
 			log.log(Level.WARNING, "Started Access Point mode!");
 		} catch (Exception e) {
 			log.log(Level.SEVERE, "Error while starting access point mode!", e);
@@ -135,9 +127,7 @@ public class RoboToyAccessPoint {
 	/**
 	 * Initializes Access Point. Create virtual interface if it does not exist.
 	 */
-	public static void becomeAccessPoint(RoboToyServerController controller,InetUtils.WiFiModeEnum mode) throws Exception {
-		final int port = controller.getAutoDiscoveryCallback().getPort();
-		final int portSecure = controller.getAutoDiscoveryCallback().getPortSecure();
+	public static void becomeAccessPoint(RoboToyServerController controller,InetUtils.WiFiModeEnum mode,Server server) throws Exception {
 		
 		// Stop temporarily the auto-discover service
 		controller.stopAutoDiscoverService();
@@ -152,7 +142,7 @@ public class RoboToyAccessPoint {
 		// Remove all players and robots from current game state
 		GameState game = controller.getContext().getGame();
 		game.removeAllPlayers();
-		game.removeAllRobots();
+		game.removeAllRobotsExceptItself();
 
 		// If it's already running as an Access Point, it should stop it
 		int hostapd_pid;
@@ -204,6 +194,8 @@ public class RoboToyAccessPoint {
 		// Enable IP Forwarding
 		InetUtils.enableIPForward();
 		// Setup NAT rules for dealing with captive portal (i.e. this RoboToy embedded web application)
+		final int port = server.getDaemonPort();
+		final int portSecure = server.getDaemonPortSecure();
 		InetUtils.setupNATRulesForCaptivePortal(port,portSecure,mode.getAPName(),InetUtils.DEFAULT_AP_GATEWAY_IP_ADDRESS,InetUtils.DEFAULT_AP_NETWORK);
 		if (controller.getContext()!=null 
 				&& controller.getContext().getGame()!=null 
@@ -220,8 +212,10 @@ public class RoboToyAccessPoint {
 		if (controller.getContext()!=null) {
 			controller.getContext().setAccessPointMode(mode);
 		}
-		// Start auto discover service
-		controller.startAutoDiscoverService(port, portSecure);		
+		// Restart server
+		if (server.isRunning())
+			server.stopServer();
+		server.run();
 	}
 	
 	/**
@@ -231,6 +225,14 @@ public class RoboToyAccessPoint {
 		if (defaultAPName.indexOf('#')<0)
 			return defaultAPName; // no '#' characters found
 		byte[] mac = InetUtils.getMACAddress();
+		if (mac==null || mac.length==0) {
+			// Try again with another method
+			try {
+				mac = InetUtils.unformatMAC(InetUtils.getHWAddress(InetUtils.DEFAULT_WIFI_INTERFACE));
+			} catch (Exception e) {
+				// stay without MAC address
+			}
+		}
 		if (mac==null || mac.length==0) {
 			return defaultAPName;
 		}

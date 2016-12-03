@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -294,6 +295,15 @@ public class GameState {
 		knownRobotAddresses.clear();
 	}
 	
+	public void removeAllRobotsExceptItself() {
+		for (Iterator<GameRobot> iterator=robots.iterator();iterator.hasNext();) {
+			GameRobot robot = iterator.next();
+			if (robot.getAddress()!=null)
+				iterator.remove();
+		}
+		knownRobotAddresses.clear();
+	}
+
 	public GameRobot findLocalRobot() {
 		if (robots.isEmpty())
 			return null;

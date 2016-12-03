@@ -64,4 +64,9 @@ public interface Server extends Runnable {
 	public void setOnCloseListener(Runnable onCloseListener);
 
 	public void setOnStartCallback(Runnable onStartCallback);
+	
+	/**
+	 * Tells if the server is running
+	 */
+	public boolean isRunning();
 }

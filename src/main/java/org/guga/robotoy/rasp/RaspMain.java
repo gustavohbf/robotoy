@@ -370,7 +370,7 @@ public class RaspMain {
         if (hasArgument(args,ARG_AUTO_AP) 
         		|| (config!=null && "true".equalsIgnoreCase(config.getProperty("auto.hostap")))) {
         	Thread t = new Thread(()->{
-        		RoboToyAccessPoint.checkAndBecomeAccessPoint(controller);
+        		RoboToyAccessPoint.checkAndBecomeAccessPoint(controller,server);
         	});
         	t.setName("RoboToyAccessPointThread");
         	t.setDaemon(true);

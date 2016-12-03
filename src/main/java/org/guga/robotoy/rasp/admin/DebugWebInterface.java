@@ -58,12 +58,12 @@ public class DebugWebInterface implements WebServer.CustomRESTfulService {
 	private static final String DEFAULT_ROBOTOY_LOG_ERR_FILE = "/tmp/robotoy.err";
 	private final GameState game;
 	private final RoboToyServerController controller;
-	//private final Server server;
+	private final Server server;
 	
 	public DebugWebInterface(RoboToyServerController controller,Server server) {
 		this.controller = controller;
 		this.game = controller.getContext().getGame();
-		//this.server = server;
+		this.server = server;
 	}
 
 	/**
@@ -184,7 +184,7 @@ public class DebugWebInterface implements WebServer.CustomRESTfulService {
 				WiFiMode mode = JSONUtils.fromJSON(requestContents, WiFiMode.class);
 				if (mode==null || mode.getMode()==null)
 					throw new UnsupportedOperationException("Invalid argument: "+requestContents);
-				RoboToyAccessPoint.becomeAccessPoint(controller, mode.getMode());
+				RoboToyAccessPoint.becomeAccessPoint(controller, mode.getMode(), server);
 				return "Turned into "+mode.getMode();
 			}
 			else {

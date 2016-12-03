@@ -382,18 +382,20 @@ public class RoboToyServerController implements CommandCentral, InclusionCallbac
 	 * You should only call this function after starting everything else.
 	 */
 	public void startAutoDiscoverService(int port,int portSecure) {
-		autoDiscoverOtherRobots = new AutoDiscoverService();
-		autoDiscoverOtherRobots.addShutdownHook();
-		String ourMagicAnswer = AutoDiscoveryRobotsCallback.prefixAutoDiscoveryAnswer+":"+context.getGame().findLocalRobot().getIdentifier();
-		autoDiscoveryCallback = new AutoDiscoveryRobotsCallback(this);
-		autoDiscoveryCallback.setPort(port);
-		autoDiscoveryCallback.setPortSecure(portSecure);
-		autoDiscoverOtherRobots.startService(
-				"Are you a Robotoy?", 				// magic question
-				ourMagicAnswer,						// our answer to others
-				AutoDiscoveryRobotsCallback.patternAutoDiscoveryAnswer,  		// expected answer from others
-				autoDiscoveryCallback				// auto discovery callback
-			);
+		if (context!=null && context.getGame()!=null && context.getGame().findLocalRobot()!=null) {
+			autoDiscoverOtherRobots = new AutoDiscoverService();
+			autoDiscoverOtherRobots.addShutdownHook();
+			String ourMagicAnswer = AutoDiscoveryRobotsCallback.prefixAutoDiscoveryAnswer+":"+context.getGame().findLocalRobot().getIdentifier();
+			autoDiscoveryCallback = new AutoDiscoveryRobotsCallback(this);
+			autoDiscoveryCallback.setPort(port);
+			autoDiscoveryCallback.setPortSecure(portSecure);
+			autoDiscoverOtherRobots.startService(
+					"Are you a Robotoy?", 				// magic question
+					ourMagicAnswer,						// our answer to others
+					AutoDiscoveryRobotsCallback.patternAutoDiscoveryAnswer,  		// expected answer from others
+					autoDiscoveryCallback				// auto discovery callback
+				);
+		}
 	}
 	
 	public void stopAutoDiscoverService() {

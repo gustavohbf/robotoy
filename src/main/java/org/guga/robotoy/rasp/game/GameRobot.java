@@ -241,10 +241,17 @@ public class GameRobot implements Cloneable {
 	 */
 	public static String getHardwareIdentifier() {
 		byte[] mac = InetUtils.getMACAddress();
-		if (mac==null)
-			return getRandomIdentifier();
-		else
-			return InetUtils.formatMAC(mac);
+		if (mac==null || mac.length==0) {
+			// Try again with another method
+			try {
+				mac = InetUtils.unformatMAC(InetUtils.getHWAddress(InetUtils.DEFAULT_WIFI_INTERFACE));
+			} catch (Exception e) {
+				// stay without MAC address
+			}
+			if (mac==null || mac.length==0)
+				return getRandomIdentifier();
+		}
+		return InetUtils.formatMAC(mac);
 	}
 	
 	private static String getRandomIdentifier() {

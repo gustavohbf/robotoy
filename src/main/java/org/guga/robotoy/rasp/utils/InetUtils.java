@@ -642,6 +642,22 @@ public class InetUtils {
 	}
 
 	/**
+	 * Get MAC address for a given network interface. Use /sys/class/net mount point.
+	 */
+	public static String getHWAddress(String iface_name) throws Exception {
+		File file = new File("/sys/class/net/"+iface_name+"/address");
+		try (FileInputStream input = new FileInputStream(file);)
+		{
+			byte[] buffer = new byte[256];
+			int len = input.read(buffer);
+			if (len>0)
+				return new String(buffer,0,len,"UTF-8");
+			else
+				return null;
+		}
+	}
+
+	/**
 	 * Get PID for service resposible for hosting Access Point
 	 */
 	public static String getStatusNetInterface(String iface_name) throws Exception {
@@ -794,6 +810,23 @@ public class InetUtils {
 			sb.append(String.format("%02X", mac[i]));
 		}
 		return sb.toString();
+	}
+	
+	/**
+	 * Given a string representation of a MAC address, returns its corresponding
+	 * binary representation.
+	 */
+	public static byte[] unformatMAC(String mac) {
+		if (mac==null || mac.length()==0)
+			return null;
+		mac = mac.replaceAll("[^A-Fa-f\\d]", "");
+		if (mac.length()==0)
+			return null;
+		byte[] ret = new byte[mac.length()/2];
+		for (int i=0;i<mac.length()-1;i+=2) {
+			ret[i/2] = (byte)Short.parseShort(mac.substring(i, i+2), 16);			
+		}
+		return ret;
 	}
 
 	/**
