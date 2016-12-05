@@ -28,7 +28,6 @@ import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.guga.robotoy.rasp.controller.RoboToyServerController;
 import org.guga.robotoy.rasp.game.GameState;
-import org.guga.robotoy.rasp.utils.InetUtils;
 
 /**
  * Some methods used for making this RoboToy work as an WiFi Access Point
@@ -158,8 +157,8 @@ public class RoboToyAccessPoint {
 		// Create host APD configuration file if it does not exists or if does not
 		// hold the same expected properties
 		String ssid = getSomeSSID();
+		String pwd = defaultAPPassword;
 		if (!InetUtils.isHostAPDFileConfigured(ssid,mode.getAPName(),mode.getBand())) {
-			String pwd = defaultAPPassword;
 			int channel = (InetUtils.WiFiBand.BAND_2_5_GHz.equals(mode.getBand())) ? DEFAULT_AP_2_5GHz_CHANNEL : DEFAULT_AP_5GHz_CHANNEL;
 			//String driver = (mode.isExternal()) ? InetUtils.getDriverName(mode.getINetName()) : null;
 			String driver = (mode.isExternal()) ? InetUtils.DEFAULT_EXTERNAL_HOSTAPD_DRIVER : null;
@@ -204,8 +203,12 @@ public class RoboToyAccessPoint {
 				InetUtils.addByPassToCaptivePortal(mode.getAPName(),address,port,portSecure);
 			}
 		}
+		InetUtils.setMulticastRoute(mode.getAPName());
+		
 		// Restart net interface
 		InetUtils.restartNetInterface(mode.getAPName());
+		if (mode.getVirtualName()!=null)
+			InetUtils.restartNetInterface(mode.getINetName());
 		// Start HOSTAPD
 		InetUtils.startHostAPD();
 		// Remember our choice

@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=iso-8859-1" 
 	language="java"
-	import="org.guga.robotoy.rasp.utils.*" %><%
+	import="org.guga.robotoy.rasp.network.*" %><%
 
 	InetUtils.NetAdapter adapters[] = InetUtils.getNetAdapters();
 	pageContext.setAttribute("adapters", adapters);

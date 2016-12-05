@@ -25,11 +25,11 @@ import org.guga.robotoy.rasp.game.GamePlayMode;
 import org.guga.robotoy.rasp.game.GameStage;
 import org.guga.robotoy.rasp.game.GameState;
 import org.guga.robotoy.rasp.motor.Motor;
+import org.guga.robotoy.rasp.network.InetUtils;
 import org.guga.robotoy.rasp.network.WebSocketActiveSession;
 import org.guga.robotoy.rasp.network.WebSocketClientPool;
 import org.guga.robotoy.rasp.optics.BeamDevice;
 import org.guga.robotoy.rasp.optics.RGBLed;
-import org.guga.robotoy.rasp.utils.InetUtils;
 import org.guga.robotoy.rasp.utils.SimpleLocalStorage;
 
 /**

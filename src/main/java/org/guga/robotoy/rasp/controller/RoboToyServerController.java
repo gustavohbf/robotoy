@@ -389,7 +389,9 @@ public class RoboToyServerController implements CommandCentral, InclusionCallbac
 			autoDiscoveryCallback = new AutoDiscoveryRobotsCallback(this);
 			autoDiscoveryCallback.setPort(port);
 			autoDiscoveryCallback.setPortSecure(portSecure);
+			String inet_name = (context.getAccessPointMode()!=null) ? context.getAccessPointMode().getAPName() : null;
 			autoDiscoverOtherRobots.startService(
+					inet_name,
 					"Are you a Robotoy?", 				// magic question
 					ourMagicAnswer,						// our answer to others
 					AutoDiscoveryRobotsCallback.patternAutoDiscoveryAnswer,  		// expected answer from others

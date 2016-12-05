@@ -19,10 +19,10 @@ import org.guga.robotoy.rasp.controller.RoboToyServerContext;
 import org.guga.robotoy.rasp.controller.RoboToyServerController;
 import org.guga.robotoy.rasp.game.GameRobot;
 import org.guga.robotoy.rasp.game.GameStage;
+import org.guga.robotoy.rasp.network.InetUtils;
 import org.guga.robotoy.rasp.network.WebSocketActiveSession;
-import org.guga.robotoy.rasp.utils.InetUtils;
-import org.guga.robotoy.rasp.utils.WiFiUtils;
-import org.guga.robotoy.rasp.utils.WiFiUtils.WiFiInfo;
+import org.guga.robotoy.rasp.network.WiFiUtils;
+import org.guga.robotoy.rasp.network.WiFiUtils.WiFiInfo;
 
 /**
  * Queries for robot's internal status.

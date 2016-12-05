@@ -23,6 +23,7 @@ import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,6 +44,7 @@ public class AutoDiscoverService {
 	 * Any address, from 239.0.0.0 to 239.255.255.255, will work.
 	 */
     public static final String DEFAULT_MULTICAST_ADDRESS = "239.255.123.111";  
+    public static final String DEFAULT_MULTICAST_NETWORK = "239.255.123.0";  
 	public static final int DEFAULT_PORT = 8090;
 	private static final int DEFAULT_CLIENT_TIMEOUT_MS = 2000;
 	
@@ -129,13 +131,14 @@ public class AutoDiscoverService {
 
 	/**
 	 * Starts asynchronous client for monitoring other components in local network 
+	 * @param inet_name Network interface name, or NULL if it should try to use the default
 	 * @param challengeQuestion Application specific magic phrase used to query other services
 	 * @param ourAnswer Application specific answer if our service get challenged from others
 	 * @param expectedAnswer Application specific answer to challenge question used to recognize other services
 	 * @param callback Callback routine used whenever some client responds
 	 * if you don't want to filter by address.
 	 */
-    public void startService(String challengeQuestion,String ourAnswer,Pattern expectedAnswer,ClientCallback callback) {
+    public void startService(String inet_name,String challengeQuestion,String ourAnswer,Pattern expectedAnswer,ClientCallback callback) {
     	
     	synchronized (runningClient) {
     		
@@ -159,9 +162,26 @@ public class AutoDiscoverService {
 	        try {
 	            clientSocket = new DatagramSocket();
                 serverSocket = new MulticastSocket(port);
+                
+                if (inet_name!=null) {
+                	try {
+                		serverSocket.setNetworkInterface(NetworkInterface.getByName(inet_name));
+                	}
+                	catch (Throwable e) {
+                		log.log(Level.SEVERE,"Error while trying to set network interface '"+inet_name+"'. Will ignore this.", e);
+                	}
+                }
 
-                InetAddress group = InetAddress.getByName(multicastAddress);
-                serverSocket.joinGroup(group);
+                boolean serving_multicast;
+                try {
+	                InetAddress group = InetAddress.getByName(multicastAddress);
+	                serverSocket.joinGroup(group);
+	                serving_multicast = true;
+                }
+                catch (Throwable e) {
+                	log.log(Level.INFO, "Coult not start to broadcast with multicast address!", e);
+                	serving_multicast = false;
+                }
 	            
 	            stopRunningClient.set(false);
 	        	runningClient.set(true);
@@ -169,16 +189,40 @@ public class AutoDiscoverService {
 	        	runningServerSocket = serverSocket;
 	        	if (log.isLoggable(Level.INFO))
 	        		log.log(Level.INFO, "Starting multicast for other services alike in local network...");
-	        	new ServerThread(challengeQuestion,ourAnswer,serverSocket).start();
+	        	if (serving_multicast) {
+	        		new ServerThread(challengeQuestion,ourAnswer,serverSocket).start();
+	        	}
 	        	int maxLengthAnswer = ourAnswer.length()*2; // estimate maximum length for others answers
 	            new ClientThread(challengeQuestion,expectedAnswer,maxLengthAnswer,callback,clientSocket).start();
 	        } catch (Exception e) {
 	            log.log(Level.SEVERE, "Error while starting multicast client for auto discovery service", e);
+	            if (log.isLoggable(Level.FINE)) {
+	            	try {
+		            	InetUtils.NetAdapter[] adapters = InetUtils.getNetAdapters();
+		            	if (adapters==null || adapters.length==0) {
+		            		log.log(Level.FINE,"Not network adapters found!");
+		            	}
+		            	else {
+		            		log.log(Level.FINE,"Network adapters found: "+Arrays.toString(adapters));
+		            	}
+	            	}
+	            	catch (Throwable e2) {
+	            		log.log(Level.FINE, "Error while reporting current network adapters", e2);
+	            	}
+	            }
 	            if (clientSocket!=null) {
-	            	clientSocket.close();
+	            	try {
+	            		clientSocket.close();
+	            	}
+	            	catch (Exception e2) {
+	            	}
 	            }
 	            if (serverSocket!=null) {
-	            	serverSocket.close();
+	            	try {
+	            		serverSocket.close();
+	            	}
+	            	catch (Exception e2) {	            		
+	            	}
 	            }
 	        }
     	}
@@ -247,6 +291,8 @@ public class AutoDiscoverService {
     	}    	
     	@Override
     	public void run() {
+    		if (log.isLoggable(Level.FINE))
+    			log.log(Level.FINE, "Starting ServerThread #"+this.getId());
     		// Waits for another clients from different hosts asking for service
         	while (runningClient.get() && !stopRunningClient.get()) {
         		
@@ -275,12 +321,15 @@ public class AutoDiscoverService {
 						} catch (IOException e) {
 							if (stopRunningClient.get())
 								break;
-							log.log(Level.SEVERE, "Error while answering requesting client", e);
+							log.log(Level.SEVERE, "Error while answering requesting client (address: "+receivePacket.getAddress()
+								+", port: "+receivePacket.getPort()+", length:"+msgData.length+")", e);
 						}                		
                 	}
                 }
 
         	} // LOOP while running client and not stop running client
+    		if (log.isLoggable(Level.FINE))
+    			log.log(Level.FINE, "Stopping ServerThread #"+this.getId());
     	}
     }
     

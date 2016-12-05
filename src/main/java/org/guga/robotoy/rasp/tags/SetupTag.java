@@ -33,8 +33,7 @@ import org.guga.robotoy.rasp.game.GamePlayMode;
 import org.guga.robotoy.rasp.game.GamePlayer;
 import org.guga.robotoy.rasp.game.GameStart;
 import org.guga.robotoy.rasp.game.GameState;
-import org.guga.robotoy.rasp.network.WPASupplicantConf;
-import org.guga.robotoy.rasp.utils.InetUtils;
+import org.guga.robotoy.rasp.network.InetUtils;
 
 /**
  * Custom tag used in SETUP PAGE.<BR>
@@ -186,30 +185,7 @@ public class SetupTag extends RoboToyCommonTag {
 			return;
 		}
 		// Change network settings (edit existing ones)
-		final String full_conf_filename = InetUtils.DEFAULT_PATH_TO_CONFIG_FILES+File.separator+InetUtils.DEFAULT_NETWORK_CONFIG_FILENAME;
-		File config_file = new File(full_conf_filename);
-		WPASupplicantConf conf = (config_file.exists() && config_file.isFile()) ? WPASupplicantConf.loadFile(full_conf_filename) : new WPASupplicantConf();
-		conf.setMissingHeaderConfigDefaultOptions();
-		WPASupplicantConf.NetworkConf netconf = conf.getNetworkConfigForSSID(ssid);
-		if (netconf==null) {
-			// add new configuration
-			netconf = new WPASupplicantConf.NetworkConf();
-			conf.addPerNetworkConfig(netconf);
-		}
-		else {
-			// edit existing configuration
-		}
-		netconf.setSSID(ssid);
-		netconf.setPSK(psk,false);
-		netconf.setScanSsid(1); // scan hidden SSID
-		netconf.setId(ssid.replaceAll(" ", "_"));
-		netconf.setPriority(5); // higher priority
-		String contents = conf.getFullContents();
-		if (log.isLoggable(Level.FINE))
-			log.log(Level.FINE, "Writing configuration file: "+config_file.getAbsolutePath());
-		try (OutputStream output = new BufferedOutputStream(new FileOutputStream(config_file));) {
-			output.write(contents.getBytes("UTF-8"));
-		}
+		InetUtils.updateWPAFile(ssid, /*hidden_ssid*/true, psk, /*quotePassphrase*/false, /*priority*/5);
 		// Change interface config file if necessary
 		if (!InetUtils.isNetInterfacesFileConfigured(InetUtils.DEFAULT_AP_INTERFACE)) {
 			String inet_config = InetUtils.makeNetInterfacesFile();

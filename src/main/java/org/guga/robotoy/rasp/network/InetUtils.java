@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.guga.robotoy.rasp.utils;
+package org.guga.robotoy.rasp.network;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -37,6 +40,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.guga.robotoy.rasp.camera.RPICamera;
+import org.guga.robotoy.rasp.utils.IOUtils;
+import org.guga.robotoy.rasp.utils.JSONUtils;
+import org.guga.robotoy.rasp.utils.ProcessUtils;
 
 /**
  * Utility methods for managing Raspberry network interfaces.
@@ -130,6 +136,72 @@ public class InetUtils {
 					return false;
 			}
 			return true;
+		}
+	}
+	
+	/**
+	 * Verifies the configuration in WPA_SUPPLICATION. Look for a given network SSID. Check additional configuration parameters.
+	 * @param ssid Network that should be checked in configuration file
+	 * @param hidden_ssid If it's true will also check if 'scan_ssid' configuration parameter is set to 1.
+	 * @param passphrase If it's not null will also check if 'psk' configuratino parameter is equal to this or to the result of 'wpa_passphrase' convertion of it.
+	 */
+	public static boolean isWPAFileConfigured(String ssid,boolean hidden_ssid,String passphrase) {
+		final String full_conf_filename = DEFAULT_PATH_TO_CONFIG_FILES+File.separator+InetUtils.DEFAULT_NETWORK_CONFIG_FILENAME;
+		File config_file = new File(full_conf_filename);
+		if (!config_file.exists() || !config_file.isFile())
+			return false;
+		WPASupplicantConf conf;
+		try {
+			conf = WPASupplicantConf.loadFile(full_conf_filename);
+		} catch (IOException e) {
+			return false;
+		}
+		WPASupplicantConf.NetworkConf net = conf.getNetworkConfigForSSID(ssid);
+		if (net==null)
+			return false;
+		if (hidden_ssid && !new Integer(1).equals(net.getScanSsid()))
+			return false;
+		if (passphrase!=null && !passphrase.equals(net.getPSK())) {
+			try {
+				String encoded = genPSK(ssid,passphrase);
+				if (!encoded.equals(net.getPSK()))
+					return false;
+			} catch (Exception e) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * Change configuration in 'wpa_supplicant' configuration file preserving existing configuration network and parameters as possible. 
+	 */
+	public static void updateWPAFile(String ssid,boolean hidden_ssid,String passphrase,boolean quotePassphrase,int priority) throws IOException {
+		final String full_conf_filename = InetUtils.DEFAULT_PATH_TO_CONFIG_FILES+File.separator+InetUtils.DEFAULT_NETWORK_CONFIG_FILENAME;
+		File config_file = new File(full_conf_filename);
+		WPASupplicantConf conf = (config_file.exists() && config_file.isFile()) ? WPASupplicantConf.loadFile(full_conf_filename) : new WPASupplicantConf();
+		conf.setMissingHeaderConfigDefaultOptions();
+		WPASupplicantConf.NetworkConf netconf = conf.getNetworkConfigForSSID(ssid);
+		if (netconf==null) {
+			// add new configuration
+			netconf = new WPASupplicantConf.NetworkConf();
+			conf.addPerNetworkConfig(netconf);
+		}
+		else {
+			// edit existing configuration
+		}
+		netconf.setSSID(ssid);
+		netconf.setPSK(passphrase,quotePassphrase);
+		if (hidden_ssid)
+			netconf.setScanSsid(1); // scan hidden SSID
+		netconf.setId(ssid.replaceAll(" ", "_"));
+		if (priority>0)
+			netconf.setPriority(priority); 
+		String contents = conf.getFullContents();
+		if (log.isLoggable(Level.FINE))
+			log.log(Level.FINE, "Writing configuration file: "+config_file.getAbsolutePath());
+		try (OutputStream output = new BufferedOutputStream(new FileOutputStream(config_file));) {
+			output.write(contents.getBytes("UTF-8"));
 		}
 	}
 	
@@ -518,7 +590,7 @@ public class InetUtils {
 						"--dport", String.valueOf(port_number),	// this port number
 						"-j", "ACCEPT");		// target: accept packets				
 			}
-			for (int port_number:new int[]{53, 67, 698, 5353}) {
+			for (int port_number:new int[]{53, 67, 698, 5353, AutoDiscoverService.DEFAULT_PORT}) {
 				if (port_number==0)
 					continue;
 				ProcessUtils.execute(null, results, ProcessUtils.DEFAULT_ENCODING, "iptables",
@@ -529,6 +601,44 @@ public class InetUtils {
 						"-j", "ACCEPT");		// target: accept packets								
 			}
 			
+			// Websockets from other robotoy connected through access point to this robotoy
+			ProcessUtils.execute(null, results, ProcessUtils.DEFAULT_ENCODING, "iptables",
+					"-t", "filter",		// 'filter' table
+					"-A", "INPUT",		// adding rule to this chain
+					"-p", "tcp",		// TCP protocol
+					"-s", network+"/24",
+					"-d", captiveAddress,	
+					"--sport", String.valueOf(port),
+					"-j", "ACCEPT");		// target: accept packets
+			if (portSecure!=0) {
+				ProcessUtils.execute(null, results, ProcessUtils.DEFAULT_ENCODING, "iptables",
+						"-t", "filter",		// 'filter' table
+						"-A", "INPUT",		// adding rule to this chain
+						"-p", "tcp",		// TCP protocol
+						"-s", network+"/24",
+						"-d", captiveAddress,	
+						"--sport", String.valueOf(portSecure),
+						"-j", "ACCEPT");		// target: accept packets				
+			}
+			
+			// Autodiscovery reply from other robotoy to broadcast from this robotoy
+			ProcessUtils.execute(null, results, ProcessUtils.DEFAULT_ENCODING, "iptables",
+					"-t", "filter",		// 'filter' table
+					"-A", "INPUT",		// adding rule to this chain
+					"-p", "udp",		// UDP protocol
+					"-s", network+"/24",
+					"-d", captiveAddress,	
+					"--sport", String.valueOf(AutoDiscoverService.DEFAULT_PORT),
+					"-j", "ACCEPT");		// target: accept packets
+
+			ProcessUtils.execute(null, results, ProcessUtils.DEFAULT_ENCODING, "iptables",
+					"-t", "filter",		// 'filter' table
+					"-A", "INPUT",		// adding rule to this chain
+					"-p", "udp",		// UDP protocol
+					"-s", captiveAddress,	
+					"-d", network+"/24",	
+					"-j", "ACCEPT");		// target: accept packets
+
 			// But reject anything else coming from unrecognized users.
 			ProcessUtils.execute(null, results, ProcessUtils.DEFAULT_ENCODING, "iptables",
 					"-t", "filter",		// 'filter' table
@@ -542,6 +652,24 @@ public class InetUtils {
 				log.log(Level.FINE,"iptables -A results:\n"+results.toString());
 			}
 		}
+	}
+	
+	/**
+	 * Add route configuration of multicast network to a given network device
+	 */
+	public static void setMulticastRoute(String inet_name) throws Exception {
+		StringBuilder results = new StringBuilder();
+		try {
+			ProcessUtils.execute(null, results, ProcessUtils.DEFAULT_ENCODING, "ip", 
+					"route", 
+					"add", AutoDiscoverService.DEFAULT_MULTICAST_NETWORK+"/24", 
+					"dev", inet_name);
+		}
+		finally {
+			if (log.isLoggable(Level.FINE)) {
+				log.log(Level.FINE,"sysctl results:\n"+results.toString());
+			}
+		}		
 	}
 
 	/**
@@ -1045,7 +1173,10 @@ public class InetUtils {
 		}
 		public void setDriver(String driver) {
 			this.driver = driver;
-		}				
+		}
+		public String toString() {
+			return JSONUtils.toJSON(this, false);
+		}
 	}
 
 
@@ -1064,7 +1195,7 @@ public class InetUtils {
 		/**
 		 * Internal WiFi used as both client (wlan0) and Access Point (virtual interface uap0)
 		 */
-		VIRTUAL_AP(DEFAULT_WIFI_INTERFACE, DEFAULT_AP_INTERFACE),
+		VIRTUAL_AP(DEFAULT_WIFI_INTERFACE, /*virtual*/ DEFAULT_AP_INTERFACE),
 		
 		/**
 		 * External WiFi USB adapter (wlan1) used as Access Point at 2.5 GHz

@@ -29,7 +29,6 @@ import org.guga.robotoy.rasp.controller.RoboToyServerContext;
 import org.guga.robotoy.rasp.controller.RoboToyServerController;
 import org.guga.robotoy.rasp.game.GameRobot;
 import org.guga.robotoy.rasp.network.AutoDiscoverService.ClientCallback;
-import org.guga.robotoy.rasp.utils.InetUtils;
 
 /**
  * Will get called back whenever finds another RoboToy in local network

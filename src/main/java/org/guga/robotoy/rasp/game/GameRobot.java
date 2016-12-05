@@ -19,8 +19,8 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.security.SecureRandom;
 
+import org.guga.robotoy.rasp.network.InetUtils;
 import org.guga.robotoy.rasp.optics.LedColor;
-import org.guga.robotoy.rasp.utils.InetUtils;
 
 /**
  * Current data about a robot. Could be ourselves, could be some other robot.
