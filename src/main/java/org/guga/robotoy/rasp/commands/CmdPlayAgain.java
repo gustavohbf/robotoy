@@ -39,6 +39,12 @@ public class CmdPlayAgain implements CommandWithBroadcast<GamePlayer> {
 
 	private static final Logger log = Logger.getLogger(CmdPlayAgain.class.getName());
 
+	@Override
+	public String getHelp() {
+		return RoboToyServerController.PLAY_AGAIN + " - Player wants to start a new game. Game is in SUMMARY stage. This command must be issued by a player.\n"
+				+ "{\"playagain\":<player summary>,\"restartgame\":<boolean>} - Notifies that a player wants to start a new game. Game is in SUMMARY stage. This command must be issued by a robot.";
+	}
+
 	public static GamePlayer run(RoboToyServerContext context,WebSocketActiveSession player_session) throws Exception {
 		if (!GameStage.SUMMARY.equals(context.getGame().getStage()))
 			throw new Exception("Game has started already!");

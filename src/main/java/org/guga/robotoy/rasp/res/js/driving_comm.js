@@ -31,27 +31,36 @@ ROBOTOY.COMM = {
 
 	has_connection : false,
 	
-	timed_info : null
+	timed_info : null,
+	
+	charging_display : null,
+	
+	charging_display_timestamp : null,
+	
+	charging_div_prev : null
 };
 
-ROBOTOY.COMM.connect_ws = function(url,div_disconnected_id,div_playfield_id,div_changeOrientation_id) {
+ROBOTOY.COMM.connect_ws = function(url) {
 
 	var c = ROBOTOY.COMM;
 	
 	c.connection = new WebSocket(url);
 	
 	var reconnect = function() {
-		ROBOTOY.COMM.connect_ws(url,div_disconnected_id,div_playfield_id,div_changeOrientation_id);
+		ROBOTOY.COMM.connect_ws(url);
 	}
 	
 	c.connection.onopen = function() {
 		if (c.waiting_reconnect) {
-			var div = document.getElementById(div_disconnected_id);
-			div.style.display = "none"
-			var divp = document.getElementById(div_playfield_id);
-			divp.style.opacity = 1
-			var divo = document.getElementById(div_changeOrientation_id);
-			divo.style.opacity = 1
+			var div = ROBOTOY.div_disconnected;
+			if (div)
+				div.style.display = "none"
+			var divp = ROBOTOY.div_playfield;
+			if (divp)
+				divp.style.opacity = 1
+			var divo = ROBOTOY.div_changeOrientation;
+			if (divo)
+				divo.style.opacity = 1
 			c.waiting_reconnect = false;
 		}
 		c.has_connection = true;
@@ -73,12 +82,15 @@ ROBOTOY.COMM.connect_ws = function(url,div_disconnected_id,div_playfield_id,div_
 	c.connection.onclose = function() {
 		console.log('WebSocket Closed Connection')
 		c.has_connection = false;
-		var divp = document.getElementById(div_playfield_id);
-		divp.style.opacity = 0
-		var divo = document.getElementById(div_changeOrientation_id);
-		divo.style.opacity = 0
-		var div = document.getElementById(div_disconnected_id);
-		div.style.display = "flex"
+		var divp = ROBOTOY.div_playfield;
+		if (divp)
+			divp.style.opacity = 0
+		var divo = ROBOTOY.div_changeOrientation;
+		if (divo)
+			divo.style.opacity = 0
+		var div = ROBOTOY.div_disconnected;
+		if (div)
+			div.style.display = "flex"
 		c.waiting_reconnect = true;
 		setTimeout(reconnect,1000);
 	};
@@ -104,6 +116,9 @@ ROBOTOY.COMM.connect_ws = function(url,div_disconnected_id,div_playfield_id,div_
 			}
 			else if (obj.updateping) {
 				c.gotUpdatePing(obj);
+			}
+			else if (obj.charging) {
+				c.gotCharging(obj);
 			}
 			else {
 				console.log('Server: '+msg);
@@ -199,6 +214,54 @@ ROBOTOY.COMM.gotUpdatePing = function(info) {
 				container.redraw();
 			}
 		}		
+	}
+}
+
+ROBOTOY.COMM.gotCharging = function(info) {
+	if (ROBOTOY.robotid==info.charging.id) {
+		var div_hide = ROBOTOY.COMM.charging_div_prev;
+		var div_show;
+		if (info.depleted) {
+			div_show = ROBOTOY.div_depleted;
+		}
+		else if (info.full) {
+			div_show = ROBOTOY.div_charged;
+		}
+		else {
+			div_show = ROBOTOY.div_charging;	
+			if (ROBOTOY.span_charges_remaining)
+				ROBOTOY.span_charges_remaining.text(info.remaining);
+		}
+		if (div_hide && !!(div_hide.offsetWidth || div_hide.offsetHeight || div_hide.getClientRects().length)) {
+			div_hide.style.display = "none";
+		}
+		if (div_show) {
+			if (!(div_show.offsetWidth || div_show.offsetHeight || div_show.getClientRects().length)) {
+				div_show.style.display = "flex";
+				div_show.style.zIndex = 1
+			}
+		}
+		ROBOTOY.life = info.charging.life;
+		var container = ROBOTOY.VIEW.container;
+		if (container) {
+			container.markRectsDamaged();
+			container.redraw();
+		}
+		ROBOTOY.COMM.charging_div_prev = div_show;
+		ROBOTOY.COMM.charging_display_timestamp = new Date().getTime();
+		if (!ROBOTOY.COMM.charging_display) {
+			ROBOTOY.COMM.charging_display = setInterval((function(){
+				var timestamp = new Date().getTime();
+				var delay = (timestamp - ROBOTOY.COMM.charging_display_timestamp);
+				if (delay>1200) {
+					var div_hide = ROBOTOY.COMM.charging_div_prev;
+					if (div_hide && !!(div_hide.offsetWidth || div_hide.offsetHeight || div_hide.getClientRects().length))
+						div_hide.style.display = "none";
+					clearInterval(ROBOTOY.COMM.charging_display);
+					ROBOTOY.COMM.charging_display = null;
+				}				
+			}),500);
+		}
 	}
 }
 

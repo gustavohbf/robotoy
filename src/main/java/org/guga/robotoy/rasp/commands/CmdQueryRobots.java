@@ -30,6 +30,11 @@ import org.guga.robotoy.rasp.network.WebSocketActiveSession;
  */
 public class CmdQueryRobots implements Command {
 
+	@Override
+	public String getHelp() {
+		return RoboToyServerController.QUERY_ROBOTS + " - Query for current robots in game.";
+	}
+
 	public static String run(RoboToyServerContext context,InetAddress localAddr) {
 		StringBuilder response = new StringBuilder();
 		response.append("{\"robots\":[");

@@ -34,6 +34,11 @@ import org.guga.robotoy.rasp.utils.JSONUtils;
  */
 public class CmdQueryRanking implements Command {
 
+	@Override
+	public String getHelp() {
+		return RoboToyServerController.QUERY_RANKING + " - Query for current game ranking.";
+	}
+
 	public static String run(RoboToyServerContext context) {
 		
 		List<GameRobot> robots = context.getGame().getRobots();

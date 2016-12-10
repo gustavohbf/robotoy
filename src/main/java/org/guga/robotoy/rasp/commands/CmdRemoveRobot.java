@@ -32,6 +32,11 @@ import org.guga.robotoy.rasp.utils.JSONUtils;
 public class CmdRemoveRobot implements CommandWithBroadcast<GameRobot> {
 
 	@Override
+	public String getHelp() {
+		return "{\"removerobot\":<robot summary>} - Notifies that a robot should be removed from game. This command must be issued by a robot.";
+	}
+
+	@Override
 	public GameRobot parseMessage(CommandIssuer issuer,RoboToyServerContext context,String message,WebSocketActiveSession session) throws Exception {
 		// robot disconnected
 		RobotSummary robot_to_remove = CmdRemoveRobot.parse(message);

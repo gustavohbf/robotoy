@@ -30,6 +30,11 @@ import org.guga.robotoy.rasp.network.WebSocketActiveSession;
  */
 public class CmdStartGame implements CommandWithBroadcast<Boolean> {
 	
+	@Override
+	public String getHelp() {
+		return "{\"startgame\":<boolean>} - Synchronize game start among robots. Current game stage is INIT. This command must be issued by a robot.";
+	}
+
 	public static void run(RoboToyServerContext context) {
 		GameStart.startGame(context.getGame());
 		// Save the name of current owner of the local robot

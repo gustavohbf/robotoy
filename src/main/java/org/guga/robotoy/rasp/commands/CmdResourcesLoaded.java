@@ -33,6 +33,11 @@ import org.guga.robotoy.rasp.utils.JSONUtils;
 public class CmdResourcesLoaded implements CommandWithBroadcast<CmdResourcesLoaded.MessageToBroadcast> {
 
 	@Override
+	public String getHelp() {
+		return "{\"loaded\":<player summary>,\"pending\":<number>} - Notifies that a player controlling a robot just got all the page resources loaded in his interface. This command must be issued by a player or robot.";
+	}
+
+	@Override
 	public CmdResourcesLoaded.MessageToBroadcast parseMessage(CommandIssuer issuer,RoboToyServerContext context,String message,WebSocketActiveSession session) throws Exception {
 
 		PlayerSummary parsed = parse(message);

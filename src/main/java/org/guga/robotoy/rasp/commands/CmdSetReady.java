@@ -39,6 +39,12 @@ public class CmdSetReady implements CommandWithBroadcast<GameRobot> {
 
 	private static final Logger log = Logger.getLogger(CmdSetReady.class.getName());
 
+	@Override
+	public String getHelp() {
+		return RoboToyServerController.START_GAME + " - Player wants to start the game. Game is in INIT stage. This command must be issued by a player.\n"
+				+ "{\"setready\":<player summary>,\"startgame\":<boolean>,\"mode\":<buttons|tilt>} - Notifies that a player wants to start the game. Game is in INIT stage. This command must be issued by a robot.";
+	}
+
 	public static GameRobot run(RoboToyServerContext context,WebSocketActiveSession player_session,GameControlMode controlMode) throws Exception {
 		if (!GameStage.INIT.equals(context.getGame().getStage()))
 			throw new Exception("Game has started already!");

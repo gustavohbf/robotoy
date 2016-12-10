@@ -31,6 +31,11 @@ import org.guga.robotoy.rasp.network.WebSocketActiveSession;
  */
 public class CmdStopGame implements CommandWithBroadcast<Boolean> {
 
+	@Override
+	public String getHelp() {
+		return "{\"stopgame\":<boolean>} - Synchronize game stop (game over) among robots. Current game stage is PLAY. This command must be issued by a robot.";
+	}
+
 	public static void run(RoboToyServerContext context) {
 		
 		// In standalone test-drive we just go back to the first page

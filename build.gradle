@@ -105,6 +105,9 @@ distTar {
 		from ('scripts/robotoy_service.sh') {
 			fileMode 0755
 		}
+		from ('scripts/checkup.sh') {
+			fileMode 0755
+		}
 	}
 	doLast {
 		delete(versionedArchiveName);
@@ -124,6 +127,9 @@ distZip {
 	}
 	into("${baseName}/bin") {
 		from ('scripts/robotoy_service.sh') {
+			fileMode 0755
+		}
+		from ('scripts/checkup.sh') {
 			fileMode 0755
 		}
 	}

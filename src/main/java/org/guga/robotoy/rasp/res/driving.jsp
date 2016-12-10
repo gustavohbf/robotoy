@@ -10,9 +10,12 @@
 	<link rel="stylesheet" type="text/css" href="waiting.css" />
 	<link rel="stylesheet" type="text/css" href="disconnected.css" />
 	<link rel="stylesheet" type="text/css" href="loading.css" />
+	<link rel="stylesheet" type="text/css" href="charging.css" />
+	<link rel="stylesheet" type="text/css" href="depleted.css" />
 	<link rel="stylesheet" type="text/css" href="driving_view.css" />
+	<link rel="stylesheet" type="text/css" href="animateflicker.css" />
 	<script src="jquery-1.12.0.min.js"></script>
-	<script src="error_handling.js"></script>
+	<app:errors/>
 <script src="canvaslayers.js"></script>
 </head>
 <body onresize="ROBOTOY.VIEW.resizeCanvas()" unselectable="on">
@@ -30,6 +33,10 @@ Your browser does not support the HTML5 canvas tag.
 <div id="waiting" style="position:absolute;display:none" class="waiting"><h1>Waiting other players...</h1></div>
 <div id="disconnected" style="position:absolute;display:none" class="disconnected"><h1>Disconnected! Trying to reconnect...</h1></div>
 <div id="loading" style="position:absolute;display:flex" class="loading"><h1>Starting engine... Please wait.</h1></div>
+<div id="charging" style="position:absolute;display:none" class="charging animate-flicker"><h1>Recharging...<BR>
+<small>Charges remaining: <span id="chargesremaining"></span></small></h1></div>
+<div id="charged" style="position:absolute;display:none" class="charging animate-flicker"><h1>Fully charged!</h1></div>
+<div id="depleted" style="position:absolute;display:none" class="depleted animate-flicker"><h1>Charge depleted!</h1></div>
 
 <form>
 <input type="hidden" name="username" id="username" value="<app:username/>">
@@ -55,7 +62,7 @@ var ROBOTOY = ROBOTOY || {}
 
 ROBOTOY.robotid = document.getElementById("robotid").value;
 ROBOTOY.life = -1;
-ROBOTOY.pending_on_start = <app:playerscount/>;
+ROBOTOY.pending_on_start = <app:playerscount pending="true"/>;
 
 ROBOTOY.loading = true;
 ROBOTOY.waiting = true;
@@ -71,6 +78,14 @@ ROBOTOY.robot_color = "<app:color/>";
 ROBOTOY.session_id = "<app:sessionid/>";
 ROBOTOY.max_life = <app:maxlife/>;
 ROBOTOY.username = document.getElementById("username").value;
+
+ROBOTOY.div_playfield = $( "#playfield" ).get(0);
+ROBOTOY.div_disconnected = $( "#disconnected" ).get(0);
+ROBOTOY.div_changeOrientation = $( "#changeOrientation" ).get(0);
+ROBOTOY.div_charging = $( "#charging" ).get(0);
+ROBOTOY.div_charged = $( "#charged" ).get(0);
+ROBOTOY.div_depleted = $( "#depleted" ).get(0);
+ROBOTOY.span_charges_remaining = $("#chargesremaining");
 
 window.addEventListener("orientationchange", function() {
 if (window.orientation == 90 || window.orientation == -90) {

@@ -109,9 +109,21 @@
   </tag>
 
   <tag>
+    <name>errors</name>
+    <tagclass>org.guga.robotoy.rasp.tags.ErrorsTag</tagclass>
+    <bodycontent>empty</bodycontent>
+  </tag>
+
+  <tag>
     <name>playerscount</name>
     <tagclass>org.guga.robotoy.rasp.tags.PlayersCountTag</tagclass>
     <bodycontent>empty</bodycontent>
+
+  	<attribute>
+	<name>pending</name>
+	<required>false</required>
+	<rtexprvalue>false</rtexprvalue>
+	</attribute>
   </tag>
 
   <tag>

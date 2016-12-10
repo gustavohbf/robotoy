@@ -27,6 +27,11 @@ import org.guga.robotoy.rasp.network.WebSocketActiveSession;
  */
 public class CmdStop implements Command {
 
+	@Override
+	public String getHelp() {
+		return RoboToyServerController.STOP+" - Stop moving. This command must be issued by a player.";
+	}
+
 	public static void run(RoboToyServerContext context) {
 		context.getMotor().stop();
 	}

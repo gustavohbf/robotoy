@@ -30,6 +30,11 @@ import org.guga.robotoy.rasp.utils.JSONUtils;
 public class CmdHit implements CommandWithBroadcast<CmdHit.Hit> {
 
 	@Override
+	public String getHelp() {
+		return "{\"hit\":<robot summary>,\"source\":<robot summary>,\"fatal\":boolean} - Notifies the robot just got hit. This command must be issued by a robot.";
+	}
+
+	@Override
 	public Object parseMessage(CommandIssuer issuer,RoboToyServerContext context,String message,WebSocketActiveSession session) throws Exception {
 		
 		if (CommandIssuer.ROBOT.equals(issuer)) {

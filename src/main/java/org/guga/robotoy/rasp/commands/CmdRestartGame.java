@@ -28,6 +28,11 @@ import org.guga.robotoy.rasp.network.WebSocketActiveSession;
  */
 public class CmdRestartGame implements CommandWithBroadcast<Boolean> {
 
+	@Override
+	public String getHelp() {
+		return "{\"restartgame\":<boolean>} - Synchronize game restart among robots. Current game stage is SUMMARY. This command must be issued by a robot.";
+	}
+
 	public static void run(RoboToyServerContext context) {
 		GameStart.restartGame(context.getGame());
 	}

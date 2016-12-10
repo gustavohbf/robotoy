@@ -32,6 +32,12 @@ import org.guga.robotoy.rasp.utils.JSONUtils;
 public class CmdQueryOwner implements Command {
 
 	@Override
+	public String getHelp() {
+		return RoboToyServerController.QUERY_OWNER + " - Query for this robot current owner.\n"
+			+ "{\"owner\":<player name>,\"previous\":<player name>} - Notifies about current robot's owner and also the previous one.";
+	}
+
+	@Override
 	public boolean isParseable(CommandIssuer issuer,String message) {
 		return message.length()>0 
 				&& (message.charAt(0)==RoboToyServerController.QUERY_OWNER

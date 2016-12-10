@@ -60,6 +60,13 @@ public class CmdPing implements CommandWithBroadcast<CmdPing.UpdatePing> {
 	
 	private static final long MIN_PING_DIFF_TO_BROADCAST_CHANGE = 10;
 
+	@Override
+	public String getHelp() {
+		return RoboToyServerController.PING+"{\"ping\":<timestamp>,\"count\":<number>} - Start a ping sequence. This command must be issued by a player.\n"
+		+ "{\"ping\":<timestamp>,\"count\":<number>} - Start or replies to a ping sequence. This command must be issued by a robot.\n"
+		+ "{\"updateping\":<delay>,\"player\":<player summary>} - Update the ping measure for a given player. This command must be issued by a robot.\n";
+	}
+
 	public static void pingPlayer(GamePlayer player,RoboToyServerContext context) {
 		if (context==null || context.getWebSocketPool()==null)
 			return;

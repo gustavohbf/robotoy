@@ -28,6 +28,11 @@ import org.guga.robotoy.rasp.network.WebSocketActiveSession;
  */
 public class CmdTurnLeft implements Command {
 
+	@Override
+	public String getHelp() {
+		return RoboToyServerController.TURN_LEFT+" - Turn left. This command must be issued by a player.";
+	}
+
 	public static void run(RoboToyServerContext context) {
 		context.getMotor().turnLeft(context.getSpeed());
 	}

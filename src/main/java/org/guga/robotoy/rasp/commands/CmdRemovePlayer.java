@@ -30,6 +30,11 @@ import org.guga.robotoy.rasp.utils.JSONUtils;
  */
 public class CmdRemovePlayer implements CommandWithBroadcast<GamePlayer> {
 
+	@Override
+	public String getHelp() {
+		return "{\"removeplayer\":<player summary>} - Notifies that a player should be removed from game. This command must be issued by a robot.";
+	}
+
 	public static GamePlayer run(RoboToyServerContext context,String player_name) {
 		if (player_name==null)
 			return null;

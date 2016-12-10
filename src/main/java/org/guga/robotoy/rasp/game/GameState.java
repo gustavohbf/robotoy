@@ -86,10 +86,16 @@ public class GameState {
 	 */
 	private final Map<String,GameRobot> knownRobotAddresses;
 	
+	/**
+	 * Synchronized list of all known cards
+	 */
+	private final List<GameCard> cards;
+	
 	public GameState() {
 		players = Collections.synchronizedList(new LinkedList<>());
 		robots = Collections.synchronizedList(new LinkedList<>());
 		knownRobotAddresses = new ConcurrentHashMap<>();
+		cards = Collections.synchronizedList(new LinkedList<>());
 	}
 
 	/**
@@ -439,5 +445,32 @@ public class GameState {
 		if (owner==null)
 			return false;
 		return player_name.equalsIgnoreCase(owner.getName());
+	}
+
+	/**
+	 * Synchronized list of all known cards
+	 */
+	public List<GameCard> getCards() {
+		return cards;
+	}
+	
+	public void addCard(GameCard card) {
+		cards.add(card);
+	}
+	
+	public void removeCard(GameCard card) {
+		cards.remove(card);
+	}
+	
+	public void removeAllCards() {
+		cards.clear();
+	}
+	
+	public GameCard findCardWithId(String id) {
+		for (GameCard card:cards) {
+			if (card.getId()!=null && card.getId().equals(id))
+				return card;
+		}
+		return null;
 	}
 }

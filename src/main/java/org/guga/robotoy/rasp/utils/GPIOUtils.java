@@ -13,44 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.guga.robotoy.rasp.tags;
+package org.guga.robotoy.rasp.utils;
 
-import java.io.IOException;
-
-import javax.servlet.jsp.JspException;
-
-import org.guga.robotoy.rasp.game.GameRobot;
+import com.pi4j.io.gpio.Pin;
+import com.pi4j.io.gpio.RaspiPin;
 
 /**
- * Custom tag used in different pages.<BR>
- * Outputs the number of players in game (controlling robots)<BR>
+ * Some utility methods used with GPIO.
  *  
  * @author Gustavo Figueiredo
  *
  */
-public class PlayersCountTag extends RoboToyCommonTag {
-	
-	private boolean pending;
-	
-	public boolean isPending() {
-		return pending;
-	}
+public class GPIOUtils {
 
-	public void setPending(boolean pending) {
-		this.pending = pending;
-	}
-
-	@Override
-	public void doTag() throws JspException, IOException {
-		int count = 0;
-		for (GameRobot robot:assertGame().getRobots()) {
-			if (robot.getOwner()==null)
-				continue;
-			if (pending && robot.getOwner().isResourcesLoaded())
-				continue;
-			count++;
+	/**
+	 * Parse input value and translates it into GPIO Pin.
+	 * @param input Text value of pin number (following wiringPi convention) or
+	 * corresponding alphanumeric name.
+	 */
+	public static Pin parsePin(String input) {
+		if (input==null || input.length()==0)
+			return null;
+		input = input.trim();
+		if (input.matches("\\d+")) {
+			int num = Integer.parseInt(input);
+			return RaspiPin.getPinByAddress(num);
 		}
-		getJspContext().getOut().print(count);
+		else {
+			return RaspiPin.getPinByName(input);
+		}
 	}
 
 }

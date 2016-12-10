@@ -38,6 +38,12 @@ import org.guga.robotoy.rasp.utils.JSONUtils;
  */
 public class CmdTakeRobot implements CommandWithBroadcast<GameRobot> {
 	
+	@Override
+	public String getHelp() {
+		return RoboToyServerController.TAKE_ROBOT + " - Take control of a robot. This command must be issued by a player.\n"
+				+ "{\"changeowner\":<robot summary>} - Notifies that a player took control a robot or is not controlling it anymore. This command must be issued by a robot.";
+	}
+
 	/**
 	 * Synchronization object used in different parts of this application that
 	 * need to assert unique control of a robot.<BR>

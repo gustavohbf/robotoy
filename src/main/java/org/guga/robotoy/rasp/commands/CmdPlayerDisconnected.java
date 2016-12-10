@@ -36,6 +36,11 @@ public class CmdPlayerDisconnected implements CommandWithBroadcast<GamePlayer> {
 	private static final Logger log = Logger.getLogger(CmdPlayerDisconnected.class.getName());
 
 	@Override
+	public String getHelp() {
+		return "{\"playeroffline\":<player summary>} - Notifies that a player just got disconnected. This command must be issued by a robot.";
+	}
+
+	@Override
 	public GamePlayer parseMessage(CommandIssuer issuer,RoboToyServerContext context,String message,WebSocketActiveSession session) throws Exception {
 		PlayerSummary player = CmdPlayerDisconnected.parse(message);
 		if (player==null) {

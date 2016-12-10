@@ -30,6 +30,11 @@ import org.guga.robotoy.rasp.utils.JSONUtils;
 public class CmdPlayerReconnected implements CommandWithBroadcast<GamePlayer> {
 
 	@Override
+	public String getHelp() {
+		return "{\"playeronline\":<player summary>} - Notifies that a player just got reconnected. This command must be issued by a robot.";
+	}
+
+	@Override
 	public GamePlayer parseMessage(CommandIssuer issuer,RoboToyServerContext context,String message,WebSocketActiveSession session) throws Exception {
 		PlayerSummary player = CmdPlayerReconnected.parse(message);
 		if (player==null)

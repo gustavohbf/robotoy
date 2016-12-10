@@ -13,44 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.guga.robotoy.rasp.tags;
-
-import java.io.IOException;
-
-import javax.servlet.jsp.JspException;
-
-import org.guga.robotoy.rasp.game.GameRobot;
+package org.guga.robotoy.rasp.game;
 
 /**
- * Custom tag used in different pages.<BR>
- * Outputs the number of players in game (controlling robots)<BR>
- *  
+ * Enumerates card types.
+ * 
  * @author Gustavo Figueiredo
  *
  */
-public class PlayersCountTag extends RoboToyCommonTag {
+public enum GameCardType {
+
+	CHARGE_LIFE (GameCardRecharger.class);
 	
-	private boolean pending;
+	private final Class<? extends GameCard> implementation;
 	
-	public boolean isPending() {
-		return pending;
+	GameCardType(Class<? extends GameCard> implementation) {
+		this.implementation = implementation;
 	}
 
-	public void setPending(boolean pending) {
-		this.pending = pending;
+	public Class<? extends GameCard> getImplementation() {
+		return implementation;
 	}
-
-	@Override
-	public void doTag() throws JspException, IOException {
-		int count = 0;
-		for (GameRobot robot:assertGame().getRobots()) {
-			if (robot.getOwner()==null)
-				continue;
-			if (pending && robot.getOwner().isResourcesLoaded())
-				continue;
-			count++;
-		}
-		getJspContext().getOut().print(count);
-	}
-
+		
 }

@@ -46,4 +46,9 @@ public interface Command {
 	 * @param parsedMessage Returned value from previous parseMessage call 
 	 */
 	default public String getReply(CommandIssuer issuer,RoboToyServerContext context,String message,WebSocketActiveSession session,Object parsedMessage) { return null; }
+	
+	/**
+	 * Return a brief message about this command and the message it may parse.
+	 */
+	public String getHelp();
 }

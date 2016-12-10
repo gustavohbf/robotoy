@@ -19,38 +19,31 @@ import java.io.IOException;
 
 import javax.servlet.jsp.JspException;
 
-import org.guga.robotoy.rasp.game.GameRobot;
-
 /**
  * Custom tag used in different pages.<BR>
- * Outputs the number of players in game (controlling robots)<BR>
- *  
+ * Must be used in &lt;head&gt; section of HTML contents.<BR>
+ * Includes javascript code for redirecting all errors from client to server.<BR>
+ * May be inhibited by configuration.
+ * 
  * @author Gustavo Figueiredo
  *
  */
-public class PlayersCountTag extends RoboToyCommonTag {
+public class ErrorsTag extends RoboToyCommonTag {
 	
-	private boolean pending;
+	private static boolean redirectErrors = true;
 	
-	public boolean isPending() {
-		return pending;
+	public static boolean isRedirectErrors() {
+		return redirectErrors;
 	}
 
-	public void setPending(boolean pending) {
-		this.pending = pending;
+	public static void setRedirectErrors(boolean redirectErrors) {
+		ErrorsTag.redirectErrors = redirectErrors;
 	}
 
 	@Override
 	public void doTag() throws JspException, IOException {
-		int count = 0;
-		for (GameRobot robot:assertGame().getRobots()) {
-			if (robot.getOwner()==null)
-				continue;
-			if (pending && robot.getOwner().isResourcesLoaded())
-				continue;
-			count++;
+		if (redirectErrors) {
+			getJspContext().getOut().println("<script src=\"error_handling.js\"></script>");
 		}
-		getJspContext().getOut().print(count);
 	}
-
 }

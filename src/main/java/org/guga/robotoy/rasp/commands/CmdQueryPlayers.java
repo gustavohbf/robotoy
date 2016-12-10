@@ -36,6 +36,12 @@ public class CmdQueryPlayers implements CommandWithBroadcast<GamePlayer> {
 
 	private static final Logger log = Logger.getLogger(CmdQueryPlayers.class.getName());
 
+	@Override
+	public String getHelp() {
+		return RoboToyServerController.QUERY_PLAYERS + " - Query for current players in game. Must be issued by a player.\n"
+			+"{\"players\":[<players summaries>]} - Notify a list of current players in game. Must be issued by a robot.";
+	}
+
 	public static String run(RoboToyServerContext context) {
 		StringBuilder response = new StringBuilder();
 		response.append("{\"players\":[");

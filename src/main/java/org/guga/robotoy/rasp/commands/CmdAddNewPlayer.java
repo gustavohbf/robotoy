@@ -32,6 +32,11 @@ import org.guga.robotoy.rasp.utils.JSONUtils;
  *
  */
 public class CmdAddNewPlayer implements CommandWithBroadcast<GamePlayer> {
+	
+	@Override
+	public String getHelp() {
+		return "{\"newplayer\":<player summary>} - Defines a new player. This command must be issued by a robot.";
+	}
 
 	public static GamePlayer run(RoboToyServerContext context,String playerName,String playerAddress,int port) throws Exception {
 		

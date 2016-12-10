@@ -28,6 +28,11 @@ import org.guga.robotoy.rasp.network.WebSocketActiveSession;
  */
 public class CmdMoveForward implements Command {
 
+	@Override
+	public String getHelp() {
+		return RoboToyServerController.MOVE_FORWARD+" - Move forward. This command must be issued by a player.";
+	}
+
 	public static void run(RoboToyServerContext context) {
 		context.getMotor().moveForward(context.getSpeed());
 	}

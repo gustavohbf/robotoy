@@ -52,12 +52,15 @@ import org.guga.robotoy.rasp.network.WebSocketClientPool;
 import org.guga.robotoy.rasp.optics.LedColor;
 import org.guga.robotoy.rasp.optics.RGBLed;
 import org.guga.robotoy.rasp.optics.RoboToyWeaponary;
+import org.guga.robotoy.rasp.rfid.RFIDRead;
+import org.guga.robotoy.rasp.rfid.RoboToyPowerUps;
+import org.guga.robotoy.rasp.utils.GPIOUtils;
 import org.guga.robotoy.rasp.utils.JSONUtils;
 import org.guga.robotoy.rasp.utils.SimpleLocalStorage;
 
 import com.pi4j.io.gpio.Pin;
 import com.pi4j.io.gpio.PinPullResistance;
-import com.pi4j.io.gpio.RaspiPin;
+import com.pi4j.io.spi.SpiChannel;
 
 /**
  * Controller for the local hardware interface. 
@@ -108,6 +111,7 @@ public class RoboToyServerController implements CommandCentral, InclusionCallbac
 	public static Command commands[] = {
 		new CmdAddNewPlayer(),
 		new CmdChangeName(),
+		new CmdCharge(),
 		new CmdFire(),
 		new CmdGreetings(),
 		new CmdHeartBeat(),
@@ -164,6 +168,10 @@ public class RoboToyServerController implements CommandCentral, InclusionCallbac
 	private Pin pinRed, pinGreen, pinBlue;
 	
 	private String adminUserName = DEFAULT_ADMIN_USER_NAME;
+	
+	private Pin pinRFID;
+	
+	private SpiChannel csRFID;
 				
 	public RoboToyServerController(GameState game) {
 		this.context = new RoboToyServerContext(game);
@@ -209,7 +217,7 @@ public class RoboToyServerController implements CommandCentral, InclusionCallbac
 	}
 
 	public void setPinBeamDevice(String pinBeamDevice) {
-		this.pinBeamDevice = parsePin(pinBeamDevice);
+		this.pinBeamDevice = GPIOUtils.parsePin(pinBeamDevice);
 	}
 
 	public Pin[] getPinDetectorDevices() {
@@ -226,7 +234,7 @@ public class RoboToyServerController implements CommandCentral, InclusionCallbac
 		else {
 			this.pinDetectorDevices = new Pin[pinDetectorDevices.length];
 			for (int i=0;i<pinDetectorDevices.length;i++) {
-				this.pinDetectorDevices[i] = parsePin(pinDetectorDevices[i].trim());
+				this.pinDetectorDevices[i] = GPIOUtils.parsePin(pinDetectorDevices[i].trim());
 			}
 		}
 	}
@@ -280,9 +288,27 @@ public class RoboToyServerController implements CommandCentral, InclusionCallbac
 
 	public void setRGBLed(RGBLed.DiodeType rgbType,String pinRed, String pinGreen, String pinBlue) {
 		this.rgbType = rgbType;
-		this.pinRed = parsePin(pinRed);
-		this.pinGreen = parsePin(pinGreen);
-		this.pinBlue = parsePin(pinBlue);
+		this.pinRed = GPIOUtils.parsePin(pinRed);
+		this.pinGreen = GPIOUtils.parsePin(pinGreen);
+		this.pinBlue = GPIOUtils.parsePin(pinBlue);
+	}
+	
+	public void setRFID(Pin pinRST, SpiChannel cs) {
+		this.pinRFID = pinRST;
+		this.csRFID = cs;
+	}
+
+	public void setRFID(String pinRST, String cs) {
+		this.pinRFID = GPIOUtils.parsePin(pinRST);
+		if (cs!=null && cs.length()>0) {
+			int cs_i = Integer.parseInt(cs);
+			this.csRFID = SpiChannel.getByNumber(cs_i);
+			if (this.csRFID==null)
+				throw new UnsupportedOperationException("Invalid rfid.cs option:"+cs);
+		}
+		else {
+			this.csRFID = SpiChannel.CS0;
+		}
 	}
 
 	public void init() {
@@ -372,6 +398,22 @@ public class RoboToyServerController implements CommandCentral, InclusionCallbac
 			}
 			else {
 				context.getRGBLed().startCycleColors(500);
+			}
+		}
+		
+		if (pinRFID!=null && csRFID!=null) {
+			try {
+				RFIDRead rfidRead = new RFIDRead();
+				rfidRead.setPinNRSTPD(pinRFID);
+				rfidRead.setSpiChannel(csRFID);
+				rfidRead.setCallback(new RoboToyPowerUps(this));
+				rfidRead.init();
+				rfidRead.addShutdownHook();
+				context.setRFIDReader(rfidRead);
+				RoboToyPowerUps.scheduleCardsManagement(this);
+			}
+			catch (Exception e) {
+				log.log(Level.SEVERE, "Error while initializing RFID reader!", e);
 			}
 		}
 	}
@@ -527,7 +569,8 @@ public class RoboToyServerController implements CommandCentral, InclusionCallbac
 	{
 		@Override
 		public void run() {
-			CmdStop.run(context);
+			if (context.getMotor()!=null)
+				CmdStop.run(context);
 		}		
 	}
 
@@ -802,16 +845,4 @@ public class RoboToyServerController implements CommandCentral, InclusionCallbac
 		}
 	}
 
-	private static Pin parsePin(String input) {
-		if (input==null || input.length()==0)
-			return null;
-		input = input.trim();
-		if (input.matches("\\d+")) {
-			int num = Integer.parseInt(input);
-			return RaspiPin.getPinByAddress(num);
-		}
-		else {
-			return RaspiPin.getPinByName(input);
-		}
-	}
 }

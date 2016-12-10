@@ -19,8 +19,6 @@ The following items should be developed sometime in future:
 
  * Better looking pages in game.
 
- * RFID reader mounted beneath each robot and a few RFID cards spread over the 'battlefield' for providing special powerups (such as restoring robot's life). 
-
  * Provide movement sensors in each robot (such as gyros and accelerometers) and use it with some control algorithm (such as PID).
  
  * Implement different alternative game goals (e.g. 'capture the flag').
@@ -84,6 +82,7 @@ Please note the version number may be different from the example above.
  * Mouting parts (3d-printed parts or just a bunch of scraps)
  * Screws (M2.5 and M3)
  * Wires (jumpers, USB cables, etc.)
+ * MFRC522 RFID module + tags (optional, but it's good for providing 'power-ups' during gameplay)
  
  From this point on, we assume all the required external packages have been already installed.
 	
@@ -98,6 +97,7 @@ Please note the version number may be different from the example above.
 <pre>
 	/usr/local/robotoy
 		/bin/
+		    checkup.sh -> Script for checking system prerequisites
 			RoboToy		-> *nix script file for starting RoboToy manually
 			RoboToy.bat	-> Windows file, you may ignore this
 			robotoy_service.sh -> Script in System-V style for running RoboToy as a service
@@ -114,6 +114,14 @@ Please note the version number may be different from the example above.
 <pre>
 	/usr/local/robotoy/config.properties
 </pre>
+
+  Before running RoboToy script you may want to run the 'checkup.sh' script located in 'bin' expanded directory.
+  
+<pre>
+    /usr/local/robotoy/bin/checkup.sh
+</pre>
+
+  This script will check if your system satisfies all RoboToy requirements (e.g.: Java version, other packages, etc.). If any item is shown as 'FAIL', you should review the installation steps described in software installation page in RoboToy Wiki. 
   
   Test if everything is ok by running RoboToy script as root.
   
@@ -247,6 +255,7 @@ External RoboToy dependencies (installation required, see Wiki):
   * WiringPi + Pi4J (http://pi4j.com/)  
   * UV4L + WebRTC (http://www.linux-projects.org/uv4l/)  
   * RXTX Serial Communication (http://rxtx.qbang.org/)
+  * SPI bus (Serial Peripheral Interface)
   
 The (suggested) RoboToy hardware (**Alpha** robot model) is powered by:
 
@@ -259,6 +268,7 @@ The (suggested) RoboToy hardware (**Alpha** robot model) is powered by:
   * LEDs, sensors and some other components
   * battery (USB power bank)
   * optional USB WiFi dongle
+  * MFRC522 RFID module
  
 ## RoboToy Modules
 
@@ -334,6 +344,15 @@ These are the features implemented in this module:
   * Play sound effects.
   * After the game is over, presents a summary screen with stats.
   * Additional administration pages for debugging and for setup of a new WiFi network.
+
+**RFID**
+
+This module is related to RFID cards and sensors. Each RoboToy is equiped with a RFID module working at 13.56 MHz attached to its base. It's used for detecting some RFID cards that are spread over the playfield. The game will treat these RFID cards in a special way, usually making the robot power up (i.e. restoring life points that it may have lost in a previous fight).
+
+These are the features implemented in this module:
+
+* Scanning for RFID signals that are reflected back from RFID tags.
+* Keep and synchronizes status about each RFID tag found during gameplay.
   
   
 ## Credits

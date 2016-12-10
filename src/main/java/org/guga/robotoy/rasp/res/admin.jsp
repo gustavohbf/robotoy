@@ -27,6 +27,7 @@
 	<li><a href="/log?last=100">Log Files (last 100 lines)</a></li>
 	<li><a href="/tableview.jsp?title=Robots&url=robots">Robots</a></li>
 	<li><a href="/tableview.jsp?title=Players&url=players">Players</a></li>
+	<li><a href="/tableview.jsp?title=Cards&url=cards">Cards</a></li>
 	<li><a href="/tableview.jsp?title=Statistics&url=stats">Statistics</a></li>
 	<li><a href="/tableview.jsp?title=Network+Interfaces&url=net">Network Interfaces</a></li>
 	<li><a href="/tableview.jsp?title=Active+WebSockets&url=sockets">Active WebSockets</a></li>

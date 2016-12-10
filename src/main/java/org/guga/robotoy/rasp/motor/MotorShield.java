@@ -19,6 +19,8 @@ import java.util.BitSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.guga.robotoy.rasp.utils.GPIOUtils;
+
 import com.pi4j.io.gpio.*;
 
 /**
@@ -58,7 +60,7 @@ public class MotorShield implements Motor
 			this.pinMotorLatch = pinMotorLatch;
 		}
 		public void setPinMotorLatch(String pinMotorLatch) {
-			this.pinMotorLatch = parsePin(pinMotorLatch);
+			this.pinMotorLatch = GPIOUtils.parsePin(pinMotorLatch);
 		}
 		public Pin getPinMotorClock() {
 			return pinMotorClock;
@@ -67,7 +69,7 @@ public class MotorShield implements Motor
 			this.pinMotorClock = pinMotorClock;
 		}
 		public void setPinMotorClock(String pinMotorClock) {
-			this.pinMotorClock = parsePin(pinMotorClock);
+			this.pinMotorClock = GPIOUtils.parsePin(pinMotorClock);
 		}
 		public Pin getPinMotorEnable() {
 			return pinMotorEnable;
@@ -76,7 +78,7 @@ public class MotorShield implements Motor
 			this.pinMotorEnable = pinMotorEnable;
 		}
 		public void setPinMotorEnable(String pinMotorEnable) {
-			this.pinMotorEnable = parsePin(pinMotorEnable);
+			this.pinMotorEnable = GPIOUtils.parsePin(pinMotorEnable);
 		}
 		public Pin getPinMotorData() {
 			return pinMotorData;
@@ -85,7 +87,7 @@ public class MotorShield implements Motor
 			this.pinMotorData = pinMotorData;
 		}
 		public void setPinMotorData(String pinMotorData) {
-			this.pinMotorData = parsePin(pinMotorData);
+			this.pinMotorData = GPIOUtils.parsePin(pinMotorData);
 		}
 		public Pin getPinPWM1() {
 			return pinPWM1;
@@ -94,7 +96,7 @@ public class MotorShield implements Motor
 			this.pinPWM1 = pinPWM1;
 		}
 		public void setPinPWM1(String pinPWM1) {
-			this.pinPWM1 = parsePin(pinPWM1);
+			this.pinPWM1 = GPIOUtils.parsePin(pinPWM1);
 		}
 		public Pin getPinPWM2() {
 			return pinPWM2;
@@ -103,7 +105,7 @@ public class MotorShield implements Motor
 			this.pinPWM2 = pinPWM2;
 		}
 		public void setPinPWM2(String pinPWM2) {
-			this.pinPWM2 = parsePin(pinPWM2);
+			this.pinPWM2 = GPIOUtils.parsePin(pinPWM2);
 		}
 		public Pin getPinPWM3() {
 			return pinPWM3;
@@ -112,7 +114,7 @@ public class MotorShield implements Motor
 			this.pinPWM3 = pinPWM3;
 		}
 		public void setPinPWM3(String pinPWM3) {
-			this.pinPWM3 = parsePin(pinPWM3);
+			this.pinPWM3 = GPIOUtils.parsePin(pinPWM3);
 		}
 		public Pin getPinPWM4() {
 			return pinPWM4;
@@ -121,7 +123,7 @@ public class MotorShield implements Motor
 			this.pinPWM4 = pinPWM4;
 		}
 		public void setPinPWM4(String pinPWM4) {
-			this.pinPWM4 = parsePin(pinPWM4);
+			this.pinPWM4 = GPIOUtils.parsePin(pinPWM4);
 		}
 		public PWMType getPwmType() {
 			return pwmType;
@@ -161,17 +163,6 @@ public class MotorShield implements Motor
 		}
 		public void setMotorRearRight(int motorRearRight) {
 			this.motorRearRight = motorRearRight;
-		}
-		private Pin parsePin(String input) {
-			if (input==null || input.length()==0)
-				return null;
-			if (input.matches("\\d+")) {
-				int num = Integer.parseInt(input);
-				return RaspiPin.getPinByAddress(num);
-			}
-			else {
-				return RaspiPin.getPinByName(input);
-			}
 		}
 		public Wheels getWheels() {
 			return wheels;

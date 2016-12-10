@@ -33,6 +33,12 @@ import org.guga.robotoy.rasp.utils.JSONUtils;
 public class CmdGreetings implements Command {
 
 	@Override
+	public String getHelp() {
+		return RoboToyServerController.GREETINGS+" - Send greetings from a robot. This command must be issued by a robot.\n"
+			+ "{\"greetings\":<player>} - Send  greetings from a player. This command must be issued by a player.";
+	}
+
+	@Override
 	public boolean isParseable(CommandIssuer issuer,String message) {
 		return message.length()>0 
 			&& ((message.charAt(0)==RoboToyServerController.GREETINGS && CommandIssuer.ROBOT.equals(issuer))

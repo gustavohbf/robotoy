@@ -36,6 +36,11 @@ public class CmdLeaveRobot implements CommandWithBroadcast<GameRobot> {
 
 	private static final Logger log = Logger.getLogger(CmdLeaveRobot.class.getName());
 
+	@Override
+	public String getHelp() {
+		return RoboToyServerController.LEAVE_ROBOT + " - Leave a robot (does not control it anymore). This command must be issued by a player.";
+	}
+
 	public static GameRobot run(RoboToyServerContext context,WebSocketActiveSession player_session,String robot_id,InetAddress robot_address) throws Exception {
 		
 		synchronized (CmdTakeRobot.SYNCHRONIZATION_OBJECT) {

@@ -103,6 +103,9 @@ public class DebugWebInterface implements WebServer.CustomRESTfulService {
 		else if (uri.equals("/players")) {
 			return game.getPlayers();
 		}
+		else if (uri.equals("/cards")) {
+			return game.getCards();
+		}
 		else if (uri.equals("/log")) {
 			int last = 0;
 			if (requestContents!=null && requestContents.length()>0) {

@@ -28,6 +28,11 @@ import org.guga.robotoy.rasp.network.WebSocketActiveSession;
  */
 public class CmdMoveBackward implements Command {
 
+	@Override
+	public String getHelp() {
+		return RoboToyServerController.MOVE_BACKWARD+" - Move backward. This command must be issued by a player.";
+	}
+
 	public static void run(RoboToyServerContext context) {
 		context.getMotor().moveBackward(context.getSpeed());
 	}

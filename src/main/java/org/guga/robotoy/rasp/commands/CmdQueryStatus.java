@@ -37,6 +37,11 @@ public class CmdQueryStatus implements Command {
 	public static final String ID_GAME_STAGE = "stage";
 	public static final String ID_ROBOT_LIFE = "life";
 
+	@Override
+	public String getHelp() {
+		return RoboToyServerController.QUERY_STATUS + " - Query for current robot status.";
+	}
+
 	public static String run(RoboToyServerContext context) {
 		StringBuilder response = new StringBuilder();
 		response.append("{\"");

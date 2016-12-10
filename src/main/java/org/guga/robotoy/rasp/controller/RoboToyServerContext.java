@@ -30,6 +30,7 @@ import org.guga.robotoy.rasp.network.WebSocketActiveSession;
 import org.guga.robotoy.rasp.network.WebSocketClientPool;
 import org.guga.robotoy.rasp.optics.BeamDevice;
 import org.guga.robotoy.rasp.optics.RGBLed;
+import org.guga.robotoy.rasp.rfid.RFIDRead;
 import org.guga.robotoy.rasp.utils.SimpleLocalStorage;
 
 /**
@@ -60,6 +61,8 @@ public class RoboToyServerContext {
 	private BeamDevice beamDevice;
 	
 	private RGBLed rgbLed;
+	
+	private RFIDRead rfidReader;
 		
 	private double speed = MAX_SPEED;
 
@@ -157,6 +160,14 @@ public class RoboToyServerContext {
 
 	public void setTakeStatistics(boolean takeStatistics) {
 		this.takeStatistics = takeStatistics;
+	}
+
+	public RFIDRead getRFIDReader() {
+		return rfidReader;
+	}
+
+	public void setRFIDReader(RFIDRead rfidReader) {
+		this.rfidReader = rfidReader;
 	}
 
 	public InetUtils.WiFiModeEnum getAccessPointMode() {

@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 
 import org.guga.robotoy.rasp.admin.DebugWebInterface;
 import org.guga.robotoy.rasp.camera.RPICamera;
+import org.guga.robotoy.rasp.controller.RoboToyConsole;
 import org.guga.robotoy.rasp.controller.RoboToyServerController;
 import org.guga.robotoy.rasp.game.GamePlayMode;
 import org.guga.robotoy.rasp.game.GameRobot;
@@ -37,6 +38,7 @@ import org.guga.robotoy.rasp.network.SocketServer;
 import org.guga.robotoy.rasp.network.WebServer;
 import org.guga.robotoy.rasp.optics.LedColor;
 import org.guga.robotoy.rasp.optics.RGBLed.DiodeType;
+import org.guga.robotoy.rasp.tags.ErrorsTag;
 import org.guga.robotoy.rasp.utils.CryptoUtils;
 import org.guga.robotoy.rasp.utils.PropertiesUtils;
 
@@ -54,10 +56,12 @@ import org.guga.robotoy.rasp.utils.PropertiesUtils;
  * <LI><B>-stage {play|summary}</B>   Skips to a given game stage ('play' or 'summary').</LI>
  * <LI><B>-port {number}</B>   Overrides 'server.port' property with given port number.</LI>
  * <LI><B>-dontredirect</B>   Overrides 'server.redirect' property with 'false' value</LI>
+ * <LI><B>-dontredirecterrors</B>   Overrides 'client.redirect' property with 'false' value</LI>
  * <LI><B>-nostats</B>  Overrides 'server.statistics' property with 'false' value</LI>
  * <LI><B>-stats</B>  Overrides 'server.statistics' property with 'true' value</LI>
  * <LI><B>-auto_ap</B>   Overrides 'auto.hostap' property with 'true' value</LI>
  * <LI><B>-no_gpio</B>   Disables use of GPIO by this application</LI>
+ * <LI><B>-console</B>   Enable an interactive console for issuing commands for debugging and testing this RoboToy while it's running</LI>
  * </UL>
  * 
  * @author Gustavo Figueiredo
@@ -78,10 +82,12 @@ public class RaspMain {
 	private static final String ARG_STAGE = "-stage";
 	private static final String ARG_PORT = "-port";
 	private static final String ARG_DONT_REDIRECT = "-dontredirect";
+	private static final String ARG_DONT_REDIRECT_ERRORS = "-dontredirecterrors";
 	private static final String ARG_DONT_TAKE_STATISTICS = "-nostats";
 	private static final String ARG_TAKE_STATISTICS = "-stats";
 	private static final String ARG_AUTO_AP = "-auto_ap";
 	private static final String ARG_NO_GPIO = "-no_gpio";
+	private static final String ARG_CONSOLE = "-console";
 	
 	private static final String DEFAULT_SSL_CERT_NAME = "robotoy.local";	
 	private static final String DEFAULT_SSL_KEYSTORE_ALIAS = "robotoy";	
@@ -202,10 +208,12 @@ public class RaspMain {
         
         if (!hasArgument(args,ARG_NO_GPIO) && config!=null) {
 
+        	// IR Led settings
         	String prop = config.getProperty("ir.pinEmitter");
         	if (prop!=null && prop.trim().length()>0)
         		controller.setPinBeamDevice(prop);
         	
+        	// IR detector settings
         	prop = config.getProperty("ir.pinDetectors");
         	if (prop!=null && prop.trim().length()>0) {
         		String[] pins = prop.split(",");
@@ -216,6 +224,7 @@ public class RaspMain {
         		controller.setPinDetectorResistor(prop);
         	}
 	        
+        	// RGB Led settings
         	String red = config.getProperty("rgb.pinRed");
         	String green = config.getProperty("rgb.pinGreen");
         	String blue = config.getProperty("rgb.pinBlue");
@@ -235,7 +244,14 @@ public class RaspMain {
         		
     	        controller.setRGBLed(dt, red, green, blue);
         	}
-	        	        
+	        	   
+        	// RFID settings
+    		String pin_rst = config.getProperty("rfid.pinReset");
+    		if (pin_rst!=null && pin_rst.trim().length()>0) {
+    			String cs = config.getProperty("rfid.cs");
+    			controller.setRFID(pin_rst, cs);
+    		}
+
         }
         
         try {
@@ -257,6 +273,8 @@ public class RaspMain {
         	System.out.println("Setting up Web server");
         	boolean dont_redirect = (hasArgument(args,ARG_DONT_REDIRECT)
         			|| (config!=null && "false".equalsIgnoreCase(config.getProperty("server.redirect"))));
+        	boolean dont_redirect_client = (hasArgument(args,ARG_DONT_REDIRECT_ERRORS)
+        			|| (config!=null && "false".equalsIgnoreCase(config.getProperty("client.redirect"))));
         	server= new WebServer((dont_redirect)?null:controller,
         			controller.getContext().getWebSocketPool(),
         			WEB_RESOURCES_PACKAGE_NAME,
@@ -282,6 +300,9 @@ public class RaspMain {
     			log.log(Level.SEVERE,"Error while generating self signed certificate for SSL connection",e);
     			return;
     		}
+    		
+    		if (dont_redirect_client)
+    			ErrorsTag.setRedirectErrors(false);
         }
         else if (ServerOption.SOCKET.equals(serverOption) || hasArgument(args,ARG_SOCKET)) {
         	System.out.println("Setting up raw sockets server");
@@ -305,7 +326,7 @@ public class RaspMain {
     			server.setDaemonPortSecure(Integer.parseInt(port_secure_argument));
     		}
     	}
-        
+    	        
         String stage_argument = getArgument(args,ARG_STAGE);
         if ("play".equalsIgnoreCase(stage_argument)) {
     		GameStart.startGame(game);
@@ -375,6 +396,10 @@ public class RaspMain {
         	t.setName("RoboToyAccessPointThread");
         	t.setDaemon(true);
         	t.start();
+        }
+        
+        if (hasArgument(args,ARG_CONSOLE)) {
+        	new RoboToyConsole(server,controller).start();
         }
 
         server.run();

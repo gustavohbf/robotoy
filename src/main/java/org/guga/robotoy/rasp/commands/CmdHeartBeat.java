@@ -28,6 +28,11 @@ import org.guga.robotoy.rasp.network.WebSocketActiveSession;
 public class CmdHeartBeat implements CommandWithBroadcast<Boolean> {
 
 	@Override
+	public String getHelp() {
+		return RoboToyServerController.HEARTBEAT + " - Send a heartbeat to keep connection alive. This command must be issued by a robot.";
+	}
+
+	@Override
 	public String getBroadcastMessage(RoboToyServerContext context,Boolean object) {
 		return String.valueOf(RoboToyServerController.HEARTBEAT);
 	}

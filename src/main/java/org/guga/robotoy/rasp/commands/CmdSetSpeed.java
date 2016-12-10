@@ -27,6 +27,13 @@ import org.guga.robotoy.rasp.network.WebSocketActiveSession;
  */
 public class CmdSetSpeed implements Command {
 
+	@Override
+	public String getHelp() {
+		return RoboToyServerController.SET_MIN_SPEED + " - Set robot speed to minimum. Must be issued by a player." +
+				RoboToyServerController.SET_MED_SPEED + " - Set robot speed to medium. Must be issued by a player." +
+				RoboToyServerController.SET_MAX_SPEED + " - Set robot speed to maximum. Must be issued by a player.";
+	}
+
 	public static void run(RoboToyServerContext context) {
 		context.getMotor().setSpeed(context.getSpeed());
 	}

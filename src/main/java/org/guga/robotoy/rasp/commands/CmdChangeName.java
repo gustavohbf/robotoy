@@ -30,6 +30,11 @@ import org.guga.robotoy.rasp.utils.JSONUtils;
 public class CmdChangeName implements CommandWithBroadcast<CmdChangeName.ChangeNameEvent> {
 
 	@Override
+	public String getHelp() {
+		return "{\"changename\":{\"oldname\":<old name>,\"newname\":<new name>}} - Change a player's name. This command must be issued by a robot.";
+	}
+
+	@Override
 	public boolean isParseable(CommandIssuer issuer,String message) {
 		return (message.startsWith("{\"changename\"") && CommandIssuer.ROBOT.equals(issuer));
 	}

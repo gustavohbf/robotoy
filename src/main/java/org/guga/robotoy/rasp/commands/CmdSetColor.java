@@ -39,6 +39,11 @@ public class CmdSetColor implements CommandWithBroadcast<GameRobot> {
 
 	private static final Logger log = Logger.getLogger(CmdSetColor.class.getName());
 
+	@Override
+	public String getHelp() {
+		return "{\"setcolor\":<robot summary>} - Change robot color.";
+	}
+
 	public static GameRobot run(RoboToyServerContext context,WebSocketActiveSession player_session,LedColor color) throws Exception {
 		if (!GameStage.INIT.equals(context.getGame().getStage()))
 			throw new Exception("Game has started already!");

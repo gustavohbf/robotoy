@@ -39,7 +39,7 @@ public class GameStart {
 		for (GamePlayer p:game.getPlayers()) {
 			p.setDismissedSummary(false);
 		}
-
+		
 		// Go back to lobby stage and do anything else related to game restart
 		restartGame(game);
 	}
@@ -80,6 +80,11 @@ public class GameStart {
 			p.setDismissedSummary(false);
 		}
 		
+		// Replenish cards
+		for (GameCard c:game.getCards()) {
+			c.reset();
+		}
+
 		// Start game as local date/time
 		game.setGameStart(new Date());
 		

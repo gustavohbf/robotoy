@@ -31,6 +31,11 @@ import org.guga.robotoy.rasp.statistics.RoboToyStatistics;
 public class CmdFire implements Command {
 
 	@Override
+	public String getHelp() {
+		return RoboToyServerController.FIRE+" - Fire the robot's gun. This command must be issued by a player.";
+	}
+
+	@Override
 	public boolean isParseable(CommandIssuer issuer,String message) {
 		return message.length()>0 && message.charAt(0)==RoboToyServerController.FIRE
 				&& CommandIssuer.PLAYER.equals(issuer);

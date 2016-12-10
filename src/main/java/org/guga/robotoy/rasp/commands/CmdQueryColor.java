@@ -29,6 +29,11 @@ import org.guga.robotoy.rasp.network.WebSocketActiveSession;
 public class CmdQueryColor implements Command {
 
 	@Override
+	public String getHelp() {
+		return RoboToyServerController.QUERY_COLOR + " - Query for this robot current color.";
+	}
+
+	@Override
 	public boolean isParseable(CommandIssuer issuer,String message) {
 		return message.length()>0 && message.charAt(0)==RoboToyServerController.QUERY_COLOR;
 	}

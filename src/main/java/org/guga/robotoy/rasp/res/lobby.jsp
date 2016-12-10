@@ -13,7 +13,7 @@
 	<link rel="stylesheet" type="text/css" href="disconnected.css" />
 	<link rel="stylesheet" type="text/css" href="lobby_view.css" />
 	<script src="jquery-1.12.0.min.js"></script>
-	<script src="error_handling.js"></script>
+	<app:errors/>
 </head>
 <body>
 <form id="lobby" method="post">

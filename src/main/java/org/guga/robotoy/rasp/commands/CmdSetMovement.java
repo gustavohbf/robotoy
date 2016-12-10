@@ -36,6 +36,11 @@ import org.guga.robotoy.rasp.utils.JSONUtils;
 public class CmdSetMovement implements Command {
 
 	@Override
+	public String getHelp() {
+		return "{\"movement\":{\"left\":<number>,\"right\":<number>}} - Change movement rate factors of robot. This command must be issued by a player.";
+	}
+
+	@Override
 	public boolean isParseable(CommandIssuer issuer,String message) {
 		return CommandIssuer.PLAYER.equals(issuer) && message.startsWith("{\"movement\":");
 	}
