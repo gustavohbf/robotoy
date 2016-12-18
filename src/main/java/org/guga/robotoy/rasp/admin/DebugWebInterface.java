@@ -16,11 +16,16 @@
 package org.guga.robotoy.rasp.admin;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
@@ -173,6 +178,10 @@ public class DebugWebInterface implements WebServer.CustomRESTfulService {
 			postInfo(requestContents,remoteAddress);
 			return "";
 		}
+		else if (uri.equals("/savereport")) {
+			String filename = saveReport();
+			return "Report saved to file "+filename;
+		}
 		else {
 			return null;
 		}
@@ -187,8 +196,20 @@ public class DebugWebInterface implements WebServer.CustomRESTfulService {
 				WiFiMode mode = JSONUtils.fromJSON(requestContents, WiFiMode.class);
 				if (mode==null || mode.getMode()==null)
 					throw new UnsupportedOperationException("Invalid argument: "+requestContents);
-				RoboToyAccessPoint.becomeAccessPoint(controller, mode.getMode(), server);
-				return "Turned into "+mode.getMode();
+				String ssid = RoboToyAccessPoint.getSomeSSID();
+				String gateway = InetUtils.DEFAULT_AP_GATEWAY_IP_ADDRESS;
+				new Thread(()->{
+					try { Thread.sleep(1000); } catch (InterruptedException e){ }
+					try {
+						RoboToyAccessPoint.becomeAccessPoint(controller, mode.getMode(), server);
+					}
+					catch (Throwable e) {
+						log.log(Level.SEVERE, "Error while becoming Access Point!",e);	
+					}
+				}) {					
+				}.start();				
+				return "Turning into "+mode.getMode()+". "
+						+ "After a few seconds, search for network '"+ssid+"' and connect your browser to IP address '"+gateway+"'!";
 			}
 			else {
 				if (requestContents==null || requestContents.length()==0)
@@ -291,6 +312,44 @@ public class DebugWebInterface implements WebServer.CustomRESTfulService {
 			log.append("\n\n");
 		}
 		return log.toString();		
+	}
+	
+	/**
+	 * Copy LOG contents to another file in RoboToy directory.
+	 */
+	private String saveReport() {
+		StringBuilder report = new StringBuilder();
+		report.append("Robots:\n");
+		report.append(JSONUtils.toJSON(game.getRobots(),true));
+		report.append("\n\nPlayers:\n");
+		report.append(JSONUtils.toJSON(game.getPlayers(),true));
+		report.append("\n\nCards:\n");
+		report.append(JSONUtils.toJSON(game.getCards(),true));
+		report.append("\n\nSummary:\n");
+		report.append(JSONUtils.toJSON(RoboToyStatistics.getSummary(),true));
+		report.append("\n\nSockets:\n");
+		report.append(JSONUtils.toJSON(getActiveSockets(),true));
+		report.append("\n\nNetwork Adapters:\n");
+		report.append(JSONUtils.toJSON(InetUtils.getNetAdapters(),true));
+		report.append("\n\nLOG:\n");
+		String log_contents = getLog(0);
+    	File ref = new File(DebugWebInterface.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+    	if (ref.isFile())
+    		ref = ref.getParentFile();
+    	final File parentDir = ref.getParentFile();
+    	final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+    	String filename = "log_"+sdf.format(new Date())+".txt";
+    	final File destination = new File(parentDir,filename);
+    	try {
+			try (OutputStream output = new BufferedOutputStream(new FileOutputStream(destination));) {
+				output.write(report.toString().getBytes("UTF-8"));
+				output.write(log_contents.getBytes("UTF-8"));
+			}
+    	}
+    	catch (IOException e) {
+			log.log(Level.SEVERE, "Error writing LOG contents!",e);	
+    	}
+		return destination.getAbsolutePath();
 	}
 	
 	/**

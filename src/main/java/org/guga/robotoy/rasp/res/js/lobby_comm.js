@@ -153,8 +153,10 @@ ROBOTOY.COMM.gotPlayersFromServer = function(info) {
 
 ROBOTOY.COMM.gotPlayerChangeName = function(info) {
 	var c = ROBOTOY.COMM;
-	if (c.has_connection)
+	if (c.has_connection) {
 		c.connection.send('P');
+		c.connection.send('R');
+	}
 }
 
 ROBOTOY.COMM.gotNewPlayer = function(info) {

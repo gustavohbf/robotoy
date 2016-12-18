@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringUtils;
 import org.guga.robotoy.rasp.controller.RoboToyServerController;
+import org.guga.robotoy.rasp.game.GameRobot;
 import org.guga.robotoy.rasp.game.GameState;
 
 /**
@@ -142,6 +143,9 @@ public class RoboToyAccessPoint {
 		GameState game = controller.getContext().getGame();
 		game.removeAllPlayers();
 		game.removeAllRobotsExceptItself();
+		GameRobot local_robot = game.findLocalRobot();
+		if (local_robot!=null && local_robot.getOwner()!=null)
+			local_robot.setOwner(null);
 
 		// If it's already running as an Access Point, it should stop it
 		int hostapd_pid;

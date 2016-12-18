@@ -44,8 +44,9 @@ public class CmdResourcesLoaded implements CommandWithBroadcast<CmdResourcesLoad
 		if (parsed==null)
 			return null;
 		
+		String robot_id = null;
 		if (CommandIssuer.ROBOT.equals(issuer)) {
-			String robot_id = RoboToyServerContext.getRobotIdentifier(session);
+			robot_id = RoboToyServerContext.getRobotIdentifier(session);
 			if (robot_id==null)
 				return null;	// issuer is not a known robot
 		}
@@ -66,11 +67,9 @@ public class CmdResourcesLoaded implements CommandWithBroadcast<CmdResourcesLoad
 		
 		CmdResourcesLoaded.MessageToBroadcast obj = new CmdResourcesLoaded.MessageToBroadcast();
 		obj.setPlayer(player);
-		if (CommandIssuer.ROBOT.equals(issuer)) {
+		if (robot_id!=null) {
 			// avoid loopback
-			GameRobot sender = context.getGame().findRobotWithAddress(session.getHost());
-			if (sender!=null)
-				obj.setExcludeReference(RoboToyServerContext.getWSPathWithRobotIdentifier(sender.getIdentifier()));
+			obj.setExcludeReference(RoboToyServerContext.getWSPathWithRobotIdentifier(robot_id));
 		}
 		return obj;
 	}

@@ -58,6 +58,7 @@
 	<li><a href="/setup.jsp?netdialog=true">Configure Network</a>
 	<li><a onClick="reboot();return false;" href="#">Reboot</a></li>
 	<li><a onClick="shutdown();return false;" href="#">Shutdown</a></li>
+	<li><a onClick="saveReport();return false;" href="#">Save Report</a></li>
 </ul>
 <div style="position:relative;float:left"><input type="button" class="blue button" value="Back" onclick="window.history.back();"></div>
 <div style="position:relative;float:right"><input type="button" class="blue button" value="Enter Game" onclick="window.location='/index.jsp'"></div>
@@ -122,6 +123,14 @@ function shutdown() {
 function configNetwork() {
 	var div = document.getElementById("setupdialog");	
 	div.style.display = "flex"	
+}
+function saveReport() {
+	$.ajax({
+	    url: '/savereport',
+	    type: 'POST',
+	    async: false,
+	    success: function(text) { alert(text); }
+	});	
 }
 </script>
 </body>
