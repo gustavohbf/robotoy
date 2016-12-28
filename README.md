@@ -33,6 +33,7 @@ The following items should be developed sometime in future:
 
  After this, you should 'build' the binaries from the source. If you are running it through some *nix (such as Raspbian), just run this:
  
+	cd robotoy
 	chmod +x gradlew
 	./gradlew build
  	 
